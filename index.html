@@ -8,7 +8,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
         select { appearance: none; }
         textarea::-webkit-scrollbar { width: 6px; }
         textarea::-webkit-scrollbar-track { background: transparent; }
@@ -18,25 +17,20 @@
 <body class="bg-slate-50 flex justify-center items-center min-h-screen p-4 sm:p-6 text-slate-700 antialiased relative">
 
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8 z-10">
-        
         <div class="text-center mb-8">
             <h2 class="text-2xl font-bold text-slate-800">Catat Perolehan</h2>
             <p class="text-sm text-slate-500 mt-2">Isi data dengan santai, Anda bisa menambahkan banyak notes sekaligus.</p>
         </div>
 
         <form id="perolehanForm" onsubmit="handleFormSubmit(this); return false;" class="space-y-6">
-            
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <label for="tanggal" class="block text-sm font-semibold text-slate-600 mb-2">Tanggal</label>
-                    <input type="date" id="tanggal" name="tanggal" required 
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white outline-none transition-all duration-200 text-slate-700">
+                    <input type="date" id="tanggal" name="tanggal" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white outline-none transition-all duration-200 text-slate-700">
                 </div>
-
                 <div class="relative">
                     <label for="nama" class="block text-sm font-semibold text-slate-600 mb-2">Nama Anda</label>
-                    <select id="nama" name="nama" required 
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white outline-none transition-all duration-200 text-slate-700 cursor-pointer">
+                    <select id="nama" name="nama" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white outline-none transition-all duration-200 text-slate-700 cursor-pointer">
                         <option value="" disabled selected>Memuat data...</option>
                     </select>
                     <div class="absolute right-4 top-10 pointer-events-none text-slate-400">
@@ -56,7 +50,7 @@
                     <div class="relative mb-4">
                         <label class="block text-sm font-semibold text-slate-600 mb-2">Pilih Produk</label>
                         <select class="product-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white outline-none transition-all duration-200 text-slate-700 cursor-pointer" required>
-                            <option value="" disabled selected>Memuat daftar produk...</option>
+                            <option value="" disabled selected>-- Pilih Nama Anda Terlebih Dahulu --</option>
                         </select>
                         <div class="absolute right-4 top-10 pointer-events-none text-slate-400">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -73,7 +67,6 @@
                                 </button>
                             </div>
                         </div>
-
                         <button type="button" class="w-full mt-3 py-2.5 border-2 border-dashed border-slate-300 text-slate-500 font-medium rounded-xl hover:bg-slate-50 hover:border-teal-400 hover:text-teal-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm" onclick="tambahNote(this)">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Tambah Catatan Lain
@@ -118,56 +111,70 @@
     </div>
 
     <script>
-        // MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI
+        // --- MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbz78FGxmizakrGRFn4sLEMdovqce11sr32vQKtuE-gHQClCLFp_QO95sg6jnPu0de6e/exec'; 
         
-        let mapRole = {};
-        let opsiProdukHTML = '<option value="" disabled selected>-- Pilih Produk --</option>';
+        let mapKaryawan = {}; 
+        let semuaProdukList = [];
+        let opsiProdukCurrent = '<option value="" disabled selected>-- Pilih Nama Anda Terlebih Dahulu --</option>';
 
         window.addEventListener('DOMContentLoaded', () => {
             setTanggalHariIni();
             fetchDataDariSpreadsheet();
+            
+            document.getElementById('nama').addEventListener('change', function() {
+                updateDropdownProduk(this.value);
+            });
         });
 
         function setTanggalHariIni() {
             const inputTanggal = document.getElementById('tanggal');
-            const hariIni = new Date();
-            inputTanggal.value = `${hariIni.getFullYear()}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-${String(hariIni.getDate()).padStart(2, '0')}`;
+            const d = new Date();
+            inputTanggal.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
         function fetchDataDariSpreadsheet() {
             fetch(scriptURL)
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
+                    mapKaryawan = data.nama || {};
+                    semuaProdukList = data.produk || [];
+                    
                     const selectNama = document.getElementById('nama');
                     selectNama.innerHTML = '<option value="" disabled selected>-- Pilih Nama Anda --</option>';
-                    
-                    if(data.nama) {
-                        data.nama.forEach(row => {
-                            const namaKaryawan = row[0];
-                            const roleKaryawan = row[1] || "";
-                            mapRole[namaKaryawan] = roleKaryawan; 
-                            selectNama.insertAdjacentHTML('beforeend', `<option value="${namaKaryawan}">${namaKaryawan}</option>`);
-                        });
-                    }
-                    
-                    if(data.produk) {
-                        data.produk.forEach(p => opsiProdukHTML += `<option value="${p}">${p}</option>`);
-                        document.querySelector('.product-input').innerHTML = opsiProdukHTML;
-                    }
+                    Object.keys(mapKaryawan).forEach(nama => {
+                        selectNama.insertAdjacentHTML('beforeend', `<option value="${nama}">${nama}</option>`);
+                    });
                 })
                 .catch(error => {
                     showModal('errorModal', 'Gagal memuat API. Pastikan internet stabil.');
-                    console.error('Gagal memuat API:', error);
                 });
         }
 
-        // --- FUNGSI UI FORM ---
+        function updateDropdownProduk(namaKaryawan) {
+            const assignedProducts = mapKaryawan[namaKaryawan].produkAssign || [];
+            let htmlOpsi = '<option value="" disabled selected>-- Pilih Produk --</option>';
+            
+            semuaProdukList.forEach(p => {
+                if (assignedProducts.length === 0 || assignedProducts.includes(p.toUpperCase())) {
+                    htmlOpsi += `<option value="${p}">${p}</option>`;
+                }
+            });
+
+            opsiProdukCurrent = htmlOpsi;
+            document.querySelectorAll('.product-input').forEach(select => { select.innerHTML = opsiProdukCurrent; });
+        }
+
         function tambahProduk() {
+            if(!document.getElementById('nama').value) {
+                showModal('errorModal', "Silakan pilih Nama Anda terlebih dahulu!");
+                return;
+            }
             const container = document.getElementById('dynamic-items-container');
             const template = container.querySelector('.item-card');
             const kartuBaru = template.cloneNode(true);
             
+            kartuBaru.querySelector('.product-input').innerHTML = opsiProdukCurrent;
             kartuBaru.querySelector('.product-input').value = '';
             
             const notesWrapper = kartuBaru.querySelector('.notes-wrapper');
@@ -176,7 +183,6 @@
             
             const notePertama = notesWrapper.querySelector('.note-item');
             notePertama.querySelector('.notes-input').value = '';
-            notePertama.querySelector('.notes-input').placeholder = 'Catatan ke-1...';
             notePertama.querySelector('.btn-remove-note').classList.add('hidden');
 
             kartuBaru.querySelector('.btn-remove-product').classList.remove('hidden');
@@ -185,85 +191,52 @@
 
         function tambahNote(btnElement) {
             const notesWrapper = btnElement.previousElementSibling; 
-            const templateNote = notesWrapper.querySelector('.note-item'); 
-            const noteBaru = templateNote.cloneNode(true);
-            
+            const noteBaru = notesWrapper.querySelector('.note-item').cloneNode(true);
             noteBaru.querySelector('.notes-input').value = ''; 
             noteBaru.querySelector('.btn-remove-note').classList.remove('hidden'); 
-            
-            const urutan = notesWrapper.querySelectorAll('.note-item').length + 1;
-            noteBaru.querySelector('.notes-input').placeholder = `Catatan ke-${urutan}...`;
             notesWrapper.appendChild(noteBaru);
         }
 
-        function hapusElemen(btnElement, targetClass) {
-            btnElement.closest(targetClass).remove();
-        }
+        function hapusElemen(btnElement, targetClass) { btnElement.closest(targetClass).remove(); }
 
-        // --- FUNGSI KONTROL MODAL ---
         function showModal(modalId, message = '') {
             const modal = document.getElementById(modalId);
-            if(message && modalId === 'errorModal') {
-                document.getElementById('errorMessage').innerText = message;
-            }
-            
-            // Menghilangkan class hidden agar elemen ada di layar
+            if(message && modalId === 'errorModal') document.getElementById('errorMessage').innerText = message;
             modal.classList.remove('hidden');
-            
-            // Sedikit jeda agar transisi CSS terbaca oleh browser
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
-                const modalBox = modal.querySelector('.relative');
-                modalBox.classList.remove('scale-95');
-                modalBox.classList.add('scale-100');
+                modal.querySelector('.relative').classList.replace('scale-95', 'scale-100');
             }, 10);
         }
 
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
-            
-            // Menjalankan animasi keluar (menghilang & mengecil)
             modal.classList.add('opacity-0');
-            const modalBox = modal.querySelector('.relative');
-            modalBox.classList.remove('scale-100');
-            modalBox.classList.add('scale-95');
-            
-            // Menunggu animasi selesai sebelum menyembunyikan elemen sepenuhnya
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            modal.querySelector('.relative').classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // --- FUNGSI SUBMIT ---
         function handleFormSubmit(formObj) {
             const btn = document.getElementById('btnSimpan');
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim Data...`;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengirim...`;
             btn.disabled = true;
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
 
             const semuaKartu = document.querySelectorAll('.item-card');
             const arrayItems = [];
             
             semuaKartu.forEach(kartu => {
                 const productVal = kartu.querySelector('.product-input').value;
-                const semuaNotes = kartu.querySelectorAll('.notes-input');
-                
-                semuaNotes.forEach(noteInput => {
+                kartu.querySelectorAll('.notes-input').forEach(noteInput => {
                     let isiNote = noteInput.value.trim();
-                    if (isiNote === "") {
-                        isiNote = "000000000000"; 
-                    }
-                    arrayItems.push({ product: productVal, notes: isiNote });
+                    arrayItems.push({ product: productVal, notes: isiNote === "" ? "000000000000" : isiNote });
                 });
             });
 
             const namaTerpilih = formObj.nama.value;
-            const roleTerpilih = mapRole[namaTerpilih] || ""; 
-
             const formData = {
                 tanggal: formObj.tanggal.value,
                 nama: namaTerpilih,
-                role: roleTerpilih, 
+                role: mapKaryawan[namaTerpilih].role || "", 
                 items: arrayItems
             };
 
@@ -272,35 +245,21 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(result => {
-                if(result.status === 'sukses') {
-                    resetFormState(formObj);
-                    showModal('successModal'); // Panggil Modal Sukses
-                } else {
-                    showModal('errorModal', "Error dari server: " + result.pesan);
-                }
+                if(result.status === 'sukses') { resetFormState(formObj); showModal('successModal'); }
+                else showModal('errorModal', "Error server: " + result.pesan);
             })
-            .catch(error => {
-                showModal('errorModal', "Gagal menghubungi server. Pastikan URL Apps Script benar dan internet stabil.");
-                console.error("Fetch Error:", error);
-            })
-            .finally(() => { 
-                btn.innerHTML = "Kirim Data Perolehan"; 
-                btn.disabled = false; 
-                btn.classList.remove('opacity-80', 'cursor-not-allowed');
-            });
+            .catch(error => showModal('errorModal', "Gagal menghubungi server."))
+            .finally(() => { btn.innerHTML = "Kirim Data Perolehan"; btn.disabled = false; });
         }
 
         function resetFormState(formObj) {
             formObj.reset();
             setTanggalHariIni();
-            
-            const semuaKartu = document.querySelectorAll('.item-card');
-            for(let i = 1; i < semuaKartu.length; i++) semuaKartu[i].remove();
-            
-            const notesTambahan = document.querySelector('.item-card').querySelectorAll('.note-item');
-            for(let j = 1; j < notesTambahan.length; j++) notesTambahan[j].remove();
+            document.querySelectorAll('.item-card').forEach((k, i) => { if(i > 0) k.remove(); });
+            document.querySelector('.item-card').querySelectorAll('.note-item').forEach((n, i) => { if(i > 0) n.remove(); });
+            document.querySelector('.product-input').innerHTML = '<option value="" disabled selected>-- Pilih Nama Anda Terlebih Dahulu --</option>';
         }
     </script>
 </body>
