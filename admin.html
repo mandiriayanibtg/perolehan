@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Data Perolehan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+        
+        /* Hilangkan panah default pada input number jika ada */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <div id="loginModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/70 p-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="mb-6 text-center">
+                <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 0h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2zm3-10V5a3 3 0 116 0v2"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Login Admin</h3>
+                <p class="mt-1 text-sm text-gray-500">Masukkan username dan password untuk mengakses panel admin.</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Username</label>
+                    <input id="loginUsername" type="text" autocomplete="username" required class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition-colors focus:border-indigo-500 focus:bg-white" placeholder="Masukkan username">
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-semibold text-gray-700">Password</label>
+                    <input id="loginPassword" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition-colors focus:border-indigo-500 focus:bg-white" placeholder="Masukkan password">
+                </div>
+                <p id="loginError" class="hidden text-sm font-medium text-red-600"></p>
+                <button type="submit" class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <nav id="adminNav" class="hidden bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg text-white shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-gray-900">Admin<span class="text-indigo-600">Panel</span></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="logoutAdmin()" class="border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+                        Logout
+                    </button>
+                    <button onclick="openFormModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center space-x-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        <span class="hidden sm:inline">Tambah Data</span>
+                        <span class="sm:hidden">Tambah</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="adminContent" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
+            
+            <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 bg-gray-50">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Database Perolehan</h2>
+                    <p class="text-sm text-gray-500 mt-1">Gunakan header untuk mencari dan mengurutkan data.</p>
+                </div>
+                <button onclick="fetchAdminData()" class="flex items-center space-x-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors shadow-sm">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Refresh Data</span>
+                </button>
+            </div>
+            
+            <div class="custom-scrollbar overflow-x-auto w-full" style="height: 60vh;">
+                <table class="min-w-full w-full text-left border-collapse whitespace-nowrap">
+                    <thead class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider sticky top-0 z-10 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors w-20" onclick="handleSort('row')">
+                                <div class="flex items-center justify-between">Baris <span id="sort-row" class="text-[10px]"></span></div>
+                            </th>
+                            <th class="px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors w-32" onclick="handleSort('tanggal')">
+                                <div class="flex items-center justify-between">Tanggal <span id="sort-tanggal" class="text-[10px]"></span></div>
+                            </th>
+                            <th class="px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors" onclick="handleSort('nama')">
+                                <div class="flex items-center justify-between">Nama & Posisi <span id="sort-nama" class="text-[10px]"></span></div>
+                            </th>
+                            <th class="px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors" onclick="handleSort('product')">
+                                <div class="flex items-center justify-between">Produk <span id="sort-product" class="text-[10px]"></span></div>
+                            </th>
+                            <th class="px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors" onclick="handleSort('notes')">
+                                <div class="flex items-center justify-between">Catatan <span id="sort-notes" class="text-[10px]"></span></div>
+                            </th>
+                            <th class="px-4 py-3 border-b border-gray-200 text-center w-32">Aksi</th>
+                        </tr>
+                        <tr class="bg-gray-50/90 backdrop-blur-sm">
+                            <th class="px-2 py-2 border-b border-gray-200 font-normal">
+                                <input type="text" id="filter-row" oninput="applyFiltersAndRender()" class="w-full text-xs p-1.5 border border-gray-300 rounded outline-none focus:border-indigo-500" placeholder="Cari...">
+                            </th>
+                            <th class="px-2 py-2 border-b border-gray-200 font-normal">
+                                <input type="text" id="filter-tanggal" oninput="applyFiltersAndRender()" class="w-full text-xs p-1.5 border border-gray-300 rounded outline-none focus:border-indigo-500" placeholder="Cari...">
+                            </th>
+                            <th class="px-2 py-2 border-b border-gray-200 font-normal">
+                                <input type="text" id="filter-nama" oninput="applyFiltersAndRender()" class="w-full text-xs p-1.5 border border-gray-300 rounded outline-none focus:border-indigo-500" placeholder="Cari...">
+                            </th>
+                            <th class="px-2 py-2 border-b border-gray-200 font-normal">
+                                <input type="text" id="filter-product" oninput="applyFiltersAndRender()" class="w-full text-xs p-1.5 border border-gray-300 rounded outline-none focus:border-indigo-500" placeholder="Cari...">
+                            </th>
+                            <th class="px-2 py-2 border-b border-gray-200 font-normal">
+                                <input type="text" id="filter-notes" oninput="applyFiltersAndRender()" class="w-full text-xs p-1.5 border border-gray-300 rounded outline-none focus:border-indigo-500" placeholder="Cari...">
+                            </th>
+                            <th class="px-2 py-2 border-b border-gray-200"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Sinkronisasi data dari server...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center bg-gray-50 gap-4">
+                <span class="text-sm text-gray-600 font-medium" id="pageInfo">Menampilkan 0-0 dari 0 data</span>
+                <div class="flex space-x-2">
+                    <button onclick="changePage(-1)" id="btnPrev" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
+                        &#8592; Previous
+                    </button>
+                    <button onclick="changePage(1)" id="btnNext" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
+                        Next &#8594;
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="formModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50 transition-opacity" onclick="closeModal('formModal')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-8 transform transition-transform duration-300 scale-95 opacity-0" id="formModalBox">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                <h3 class="text-xl font-bold text-gray-800" id="modalTitle">Tambah Data</h3>
+                <button onclick="closeModal('formModal')" class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="adminForm" onsubmit="submitForm(event)" class="space-y-5">
+                <input type="hidden" id="editRowNumber">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal</label>
+                    <input type="date" id="inputTanggal" required class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-colors text-gray-800">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Pegawai</label>
+                    <select id="inputNama" required class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-colors text-gray-800">
+                        <option value="" disabled selected>Memuat...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Produk</label>
+                    <select id="inputProduk" required class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-colors text-gray-800">
+                        <option value="" disabled selected>Memuat...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Catatan (Notes)</label>
+                    <textarea id="inputNotes" required rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-colors resize-none text-gray-800"></textarea>
+                </div>
+                <div class="pt-4">
+                    <button type="submit" id="btnSubmitForm" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md flex justify-center items-center space-x-2">
+                        <span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50 transition-opacity" onclick="closeModal('deleteModal')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 sm:p-8 text-center transform transition-transform duration-300 scale-95 opacity-0" id="deleteModalBox">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-5">
+                <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus Data Ini?</h3>
+            <p class="text-gray-500 text-sm mb-8">Data akan dihapus permanen dari Spreadsheet dan tidak dapat dikembalikan.</p>
+            <input type="hidden" id="deleteRowTarget">
+            <div class="flex space-x-3">
+                <button onclick="closeModal('deleteModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-xl transition-colors">Batal</button>
+                <button onclick="executeDelete()" id="btnConfirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md flex justify-center items-center">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MASUKKAN URL ASLI (BERAKHIRAN /exec) ANDA DI SINI ---
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbz78FGxmizakrGRFn4sLEMdovqce11sr32vQKtuE-gHQClCLFp_QO95sg6jnPu0de6e/exec'; 
+        
+        let allData = [];
+        let masterKaryawan = {};
+        let masterProduk = [];
+
+        const ADMIN_CREDENTIALS = {
+            username: 'bony',
+            password: '5rt0op'
+        };
+
+        // --- VARIABEL SORTING, FILTERING & PAGINATION ---
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 50;
+        let sortCol = 'row'; // Default urut berdasarkan nomor baris
+        let sortAsc = false; // Default descending (data terbaru di atas)
+
+        function showAdminApp() {
+            document.getElementById('adminNav').classList.remove('hidden');
+            document.getElementById('adminContent').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function hideAdminApp() {
+            document.getElementById('adminNav').classList.add('hidden');
+            document.getElementById('adminContent').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                errorEl.classList.add('hidden');
+                document.getElementById('loginForm').reset();
+                showAdminApp();
+                fetchAdminData();
+            } else {
+                errorEl.textContent = 'Username atau password salah.';
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminAuthenticated');
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').classList.add('hidden');
+            hideAdminApp();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+                showAdminApp();
+                fetchAdminData();
+            } else {
+                hideAdminApp();
+            }
+        });
+
+        function fetchAdminData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500"><svg class="animate-spin h-8 w-8 mx-auto mb-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sinkronisasi data dari server...</td></tr>`;
+            
+            const scriptURL = BASE_URL + (BASE_URL.includes('?') ? '&' : '?') + 'action=getAdminData';
+
+            fetch(scriptURL)
+                .then(res => res.json())
+                .then(data => {
+                    allData = data.data || [];
+                    masterKaryawan = data.karyawan || {};
+                    masterProduk = data.produk || [];
+                    
+                    populateDropdowns();
+                    applyFiltersAndRender(); // Ganti dari renderTable() ke applyFiltersAndRender()
+                })
+                .catch(err => {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-500 font-bold bg-red-50">Gagal memuat data. Periksa URL API.</td></tr>`;
+                });
+        }
+
+        // --- FUNGSI PENGELOLAAN DATA (FILTER, SORT, PAGINATE) ---
+        function applyFiltersAndRender() {
+            // 1. Ambil nilai filter dari setiap kolom input
+            const fRow = document.getElementById('filter-row').value.toLowerCase();
+            const fTanggal = document.getElementById('filter-tanggal').value.toLowerCase();
+            const fNama = document.getElementById('filter-nama').value.toLowerCase();
+            const fProduct = document.getElementById('filter-product').value.toLowerCase();
+            const fNotes = document.getElementById('filter-notes').value.toLowerCase();
+
+            // 2. Eksekusi Filter
+            filteredData = allData.filter(row => {
+                return String(row.row).toLowerCase().includes(fRow) &&
+                       String(row.tanggal).toLowerCase().includes(fTanggal) &&
+                       (String(row.nama).toLowerCase().includes(fNama) || String(row.role).toLowerCase().includes(fNama)) &&
+                       String(row.product).toLowerCase().includes(fProduct) &&
+                       String(row.notes).toLowerCase().includes(fNotes);
+            });
+
+            // 3. Eksekusi Sort (Pengurutan)
+            filteredData.sort((a, b) => {
+                let valA = a[sortCol];
+                let valB = b[sortCol];
+                
+                // Pastikan 'row' diurutkan secara matematis (angka), bukan abjad
+                if (sortCol === 'row') {
+                    valA = Number(valA); valB = Number(valB);
+                } else {
+                    valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase();
+                }
+
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            updateSortIcons();
+
+            // 4. Eksekusi Pagination (Pembatasan 50 data per halaman)
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
+            // 5. Update UI
+            renderTable(paginatedData);
+            
+            // 6. Update Status Navigasi Bawah
+            const itemAwal = filteredData.length === 0 ? 0 : startIndex + 1;
+            const itemAkhir = Math.min(endIndex, filteredData.length);
+            
+            document.getElementById('pageInfo').innerText = `Menampilkan ${itemAwal}-${itemAkhir} dari ${filteredData.length} data`;
+            document.getElementById('btnPrev').disabled = currentPage === 1;
+            document.getElementById('btnNext').disabled = currentPage === totalPages;
+        }
+
+        function handleSort(col) {
+            // Jika mengklik kolom yang sama, balik arah urutan
+            if (sortCol === col) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = col;
+                sortAsc = true; // Default pengurutan A-Z untuk kolom baru
+            }
+            applyFiltersAndRender();
+        }
+
+        function updateSortIcons() {
+            // Reset semua ikon panah terlebih dahulu
+            const cols = ['row', 'tanggal', 'nama', 'product', 'notes'];
+            cols.forEach(c => { document.getElementById('sort-' + c).innerHTML = ''; });
+
+            // Set ikon panah pada kolom yang sedang aktif diurutkan
+            const icon = sortAsc ? '&#9650;' : '&#9660;'; // Segitiga atas / Segitiga bawah
+            document.getElementById('sort-' + sortCol).innerHTML = icon;
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            applyFiltersAndRender();
+        }
+
+        // --- FUNGSI RENDER TABEL HTML ---
+        function renderTable(dataToRender) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            if (dataToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500 italic">Data tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            dataToRender.forEach(row => {
+                let noteTruncated = row.notes.length > 45 ? row.notes.substring(0, 45) + '...' : row.notes;
+                const rowDataStr = encodeURIComponent(JSON.stringify(row));
+
+                const tr = `
+                <tr class="hover:bg-indigo-50/40 transition-colors">
+                    <td class="px-4 py-3 font-mono text-gray-400 text-xs font-semibold">#${row.row}</td>
+                    <td class="px-4 py-3 font-medium text-gray-700">${row.tanggal}</td>
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-gray-900">${row.nama}</div>
+                        <div class="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5 font-semibold">${row.role}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-[11px] font-bold tracking-wide border border-indigo-200">${row.product}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600 truncate max-w-[150px] sm:max-w-[200px]" title="${row.notes}">${noteTruncated}</td>
+                    <td class="px-4 py-3 text-center">
+                        <div class="flex justify-center items-center space-x-2">
+                            <button onclick="openFormModal('${rowDataStr}')" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition-colors" title="Edit Baris">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="openDeleteModal(${row.row})" class="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors" title="Hapus Baris">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', tr);
+            });
+        }
+
+        // --- FUNGSI DROPDOWN FORM ---
+        function populateDropdowns() {
+            const selNama = document.getElementById('inputNama');
+            const selProd = document.getElementById('inputProduk');
+            
+            selNama.innerHTML = '<option value="" disabled selected>Pilih Pegawai...</option>';
+            Object.keys(masterKaryawan).forEach(nama => selNama.insertAdjacentHTML('beforeend', `<option value="${nama}">${nama}</option>`));
+            
+            selProd.innerHTML = '<option value="" disabled selected>Pilih Produk...</option>';
+            masterProduk.forEach(p => selProd.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
+        }
+
+        // --- MANAJEMEN MODAL ---
+        function openFormModal(encodedData = null) {
+            const modal = document.getElementById('formModal');
+            const box = document.getElementById('formModalBox');
+            
+            document.getElementById('adminForm').reset();
+            
+            if (encodedData) {
+                const rowData = JSON.parse(decodeURIComponent(encodedData));
+                document.getElementById('modalTitle').innerText = "Edit Data (Baris #" + rowData.row + ")";
+                document.getElementById('editRowNumber').value = rowData.row;
+                document.getElementById('inputTanggal').value = rowData.tanggal;
+                document.getElementById('inputNama').value = rowData.nama;
+                document.getElementById('inputProduk').value = rowData.product;
+                document.getElementById('inputNotes').value = rowData.notes;
+            } else {
+                document.getElementById('modalTitle').innerText = "Tambah Data Baru";
+                document.getElementById('editRowNumber').value = "";
+                const d = new Date();
+                document.getElementById('inputTanggal').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.replace('scale-95', 'scale-100');
+                box.classList.replace('opacity-0', 'opacity-100');
+            }, 20);
+        }
+
+        function openDeleteModal(rowNum) {
+            document.getElementById('deleteRowTarget').value = rowNum;
+            const modal = document.getElementById('deleteModal');
+            const box = document.getElementById('deleteModalBox');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.replace('scale-95', 'scale-100');
+                box.classList.replace('opacity-0', 'opacity-100');
+            }, 20);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const box = document.getElementById(modalId + 'Box');
+            
+            modal.classList.add('opacity-0');
+            box.classList.replace('scale-100', 'scale-95');
+            box.classList.replace('opacity-100', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- FUNGSI CRUD KE SERVER API ---
+        function submitForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitForm');
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
+            btn.disabled = true;
+
+            const rowNum = document.getElementById('editRowNumber').value;
+            const namaTerpilih = document.getElementById('inputNama').value;
+            
+            const payload = {
+                action: rowNum ? 'update' : 'create',
+                row: rowNum ? parseInt(rowNum) : null,
+                tanggal: document.getElementById('inputTanggal').value,
+                nama: namaTerpilih,
+                role: masterKaryawan[namaTerpilih] ? masterKaryawan[namaTerpilih].role : "",
+                product: document.getElementById('inputProduk').value,
+                notes: document.getElementById('inputNotes').value
+            };
+
+            fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'sukses') {
+                    closeModal('formModal');
+                    fetchAdminData(); 
+                } else alert("Terdapat kesalahan server: " + res.pesan);
+            })
+            .catch(err => alert("Gagal menghubungi server. Cek internet Anda."))
+            .finally(() => { btn.innerHTML = `Simpan Perubahan`; btn.disabled = false; });
+        }
+
+        function executeDelete() {
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menghapus...`;
+            btn.disabled = true;
+            
+            const rowNum = document.getElementById('deleteRowTarget').value;
+            
+            fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'delete', row: parseInt(rowNum) })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'sukses') {
+                    closeModal('deleteModal');
+                    fetchAdminData();
+                } else alert("Terdapat kesalahan server: " + res.pesan);
+            })
+            .catch(err => alert("Gagal menghubungi server. Cek internet Anda."))
+            .finally(() => { btn.innerHTML = `Hapus`; btn.disabled = false; });
+        }
+    </script>
+</body>
+</html>
