@@ -372,7 +372,15 @@
             });
             const grandTotal = sortedEmployees.reduce((sum, emp) => sum + akumulasi[emp]['TOTAL'], 0);
 
-            let tbody = `<tbody class="text-sm text-slate-700 divide-y divide-slate-100">`;
+            let tbody = `<tbody class="text-sm text-slate-700 divide-y divide-slate-100">
+                <tr class="bg-slate-800 text-white font-bold">
+                    <td class="p-3 border-r border-slate-700">TOTAL PER PRODUK</td>`;
+            allProducts.forEach(prod => {
+                const totalValue = totalPerProduk[prod];
+                tbody += `<td class="p-3 border-r border-slate-700 text-center">${totalValue}</td>`;
+            });
+            tbody += `<td class="p-3 text-center bg-slate-900">${grandTotal}</td></tr>`;
+
             sortedEmployees.forEach(emp => {
                 let totalVal = akumulasi[emp]['TOTAL'];
                 let isNihil = totalVal === 0;
@@ -404,14 +412,6 @@
                 tbody += `<td class="p-3 text-center bg-slate-50">${totalHtml}</td></tr>`;
             });
 
-            tbody += `
-                <tr class="bg-slate-800 text-white font-bold">
-                    <td class="p-3 border-r border-slate-700">TOTAL PER PRODUK</td>`;
-            allProducts.forEach(prod => {
-                const totalValue = totalPerProduk[prod];
-                tbody += `<td class="p-3 border-r border-slate-700 text-center">${totalValue}</td>`;
-            });
-            tbody += `<td class="p-3 text-center bg-slate-900">${grandTotal}</td></tr>`;
             tbody += `</tbody>`;
             
             document.getElementById('tabelDetailAkumulasi').innerHTML = thead + tbody;
