@@ -74,6 +74,31 @@
 
     </div>
 
+    <button type="button" id="navFab" onclick="openNavModal()" class="fixed bottom-5 right-5 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_12px_30px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 hover:bg-slate-800" aria-label="Buka menu navigasi">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <div id="navModal" class="hidden fixed inset-0 z-[75] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeNavModal()"></div>
+        <div class="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/60 bg-white/90 p-5 shadow-[0_25px_80px_rgba(0,0,0,.3)] backdrop-blur-2xl transform scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">Navigasi</p>
+                    <h3 class="font-display text-xl font-bold text-slate-900">Pilih Halaman</h3>
+                </div>
+                <button type="button" onclick="closeNavModal()" class="text-slate-400 hover:text-rose-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <button type="button" onclick="navigateToPage('index.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Form Input</button>
+                <button type="button" onclick="navigateToPage('admin.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Admin</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT UTAMA -->
     <script>
         // --- MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI ---
@@ -82,6 +107,7 @@
         let rawDataGlobal = [];
         let targetProdukGlobal = {}; 
         let masterKaryawanGlobal = {}; 
+        let detailTableSortState = { field: 'total', direction: 'desc', value: '' };
 
         window.addEventListener('DOMContentLoaded', () => {
             setTanggalFilterHariIni();
@@ -122,6 +148,33 @@
             const mm = String(awalBulan.getMonth() + 1).padStart(2, '0');
             const dd = String(awalBulan.getDate()).padStart(2, '0');
             document.getElementById('startDateDetail').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        function openNavModal() {
+            const modal = document.getElementById('navModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                const box = modal.querySelector('.relative');
+                if (box) box.classList.replace('scale-95', 'scale-100');
+            }, 10);
+        }
+
+        function closeNavModal() {
+            const modal = document.getElementById('navModal');
+            if (!modal) return;
+            const box = modal.querySelector('.relative');
+            modal.classList.add('opacity-0');
+            if (box) box.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function navigateToPage(page) {
+            closeNavModal();
+            setTimeout(() => {
+                window.location.href = page;
+            }, 250);
         }
 
         // ==========================================
@@ -243,19 +296,54 @@
                 }
             });
 
-            allEmployees.sort((a, b) => akumulasi[b]['TOTAL'] - akumulasi[a]['TOTAL']);
+            const sortedEmployees = [...allEmployees].sort((a, b) => {
+                const aValue = getDetailSortValue(a, detailTableSortState.field, detailTableSortState.value, akumulasi, masterKaryawanGlobal);
+                const bValue = getDetailSortValue(b, detailTableSortState.field, detailTableSortState.value, akumulasi, masterKaryawanGlobal);
+
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    if (aValue === bValue) {
+                        return a.localeCompare(b, 'id', { sensitivity: 'base' });
+                    }
+                    return detailTableSortState.direction === 'asc' ? aValue - bValue : bValue - aValue;
+                }
+
+                const nameCompare = String(aValue).localeCompare(String(bValue), 'id', { sensitivity: 'base' });
+                return detailTableSortState.direction === 'asc' ? nameCompare : -nameCompare;
+            });
             
             let thead = `
                 <thead class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider font-bold">
                     <tr>
-                        <th class="p-3 border-b border-r border-slate-200">Nama Pegawai</th>`;
+                        <th class="p-3 border-b border-r border-slate-200">
+                            <button type="button" class="flex w-full items-center justify-between gap-2 text-left" onclick="setDetailTableSort('name')">
+                                <span>Nama Pegawai</span>
+                                <span class="text-[10px]">${detailTableSortState.field === 'name' ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
+                            </button>
+                        </th>`;
             allProducts.forEach(prod => {
-                thead += `<th class="p-3 border-b border-r border-slate-200 text-center">${prod}</th>`;
+                const safeProd = prod.replace(/'/g, "\\'");
+                thead += `<th class="p-3 border-b border-r border-slate-200 text-center">
+                    <button type="button" class="flex w-full items-center justify-center gap-2 font-bold" onclick="setDetailTableSort('product', '${safeProd}')">
+                        <span>${prod}</span>
+                        <span class="text-[10px]">${detailTableSortState.field === 'product' && detailTableSortState.value === prod ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
+                    </button>
+                </th>`;
             });
-            thead += `<th class="p-3 border-b border-slate-200 text-center bg-slate-200 text-slate-800">TOTAL</th></tr></thead>`;
+            thead += `<th class="p-3 border-b border-slate-200 text-center bg-slate-200 text-slate-800">
+                <button type="button" class="flex w-full items-center justify-center gap-2 font-bold" onclick="setDetailTableSort('total')">
+                    <span>TOTAL</span>
+                    <span class="text-[10px]">${detailTableSortState.field === 'total' ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
+                </button>
+            </th></tr></thead>`;
             
+            const totalPerProduk = {};
+            allProducts.forEach(prod => {
+                totalPerProduk[prod] = sortedEmployees.reduce((sum, emp) => sum + akumulasi[emp][prod], 0);
+            });
+            const grandTotal = sortedEmployees.reduce((sum, emp) => sum + akumulasi[emp]['TOTAL'], 0);
+
             let tbody = `<tbody class="text-sm text-slate-700 divide-y divide-slate-100">`;
-            allEmployees.forEach(emp => {
+            sortedEmployees.forEach(emp => {
                 let totalVal = akumulasi[emp]['TOTAL'];
                 let isNihil = totalVal === 0;
                 let textClass = isNihil ? "text-slate-400" : "text-slate-800 font-bold";
@@ -265,17 +353,61 @@
                         <td class="p-3 border-r border-slate-100 ${textClass}">${emp}</td>`;
                 
                 allProducts.forEach(prod => {
-                    let val = akumulasi[emp][prod];
-                    let valHtml = val === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${val}</span>`;
-                    tbody += `<td class="p-3 border-r border-slate-100 text-center">${valHtml}</td>`;
+                    const assignedProducts = (masterKaryawanGlobal[emp]?.produkAssign || [])
+                        .map(item => String(item).trim().toUpperCase());
+                    const isAssigned = assignedProducts.length === 0 || assignedProducts.includes(String(prod).trim().toUpperCase());
+                    const val = akumulasi[emp][prod];
+                    const cellClass = isAssigned
+                        ? "p-3 border-r border-slate-100 text-center"
+                        : "p-3 border-r border-rose-200 bg-rose-50 text-rose-700 text-center";
+                    const valHtml = !isAssigned
+                        ? `<span class="font-bold">✕</span>`
+                        : (val === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${val}</span>`);
+                    tbody += `<td class="${cellClass}">${valHtml}</td>`;
                 });
                 
                 let totalHtml = isNihil ? `<span class="text-slate-300">-</span>` : `<span class="font-black text-slate-800">${totalVal}</span>`;
                 tbody += `<td class="p-3 text-center bg-slate-50">${totalHtml}</td></tr>`;
             });
+
+            tbody += `
+                <tr class="bg-slate-800 text-white font-bold">
+                    <td class="p-3 border-r border-slate-700">TOTAL PER PRODUK</td>`;
+            allProducts.forEach(prod => {
+                const totalValue = totalPerProduk[prod];
+                tbody += `<td class="p-3 border-r border-slate-700 text-center">${totalValue}</td>`;
+            });
+            tbody += `<td class="p-3 text-center bg-slate-900">${grandTotal}</td></tr>`;
             tbody += `</tbody>`;
             
             document.getElementById('tabelDetailAkumulasi').innerHTML = thead + tbody;
+        }
+
+        function getDetailSortValue(emp, field, productName, akumulasi, masterKaryawanGlobal) {
+            if (field === 'name') {
+                return emp.toLowerCase();
+            }
+
+            if (field === 'product' && productName) {
+                const assignedProducts = (masterKaryawanGlobal[emp]?.produkAssign || [])
+                    .map(item => String(item).trim().toUpperCase());
+                const isAssigned = assignedProducts.length === 0 || assignedProducts.includes(String(productName).trim().toUpperCase());
+                if (!isAssigned) return -1;
+                return akumulasi[emp][productName];
+            }
+
+            return akumulasi[emp]['TOTAL'];
+        }
+
+        function setDetailTableSort(field, value = '') {
+            if (detailTableSortState.field === field && detailTableSortState.value === value) {
+                detailTableSortState.direction = detailTableSortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                detailTableSortState.field = field;
+                detailTableSortState.value = value;
+                detailTableSortState.direction = field === 'name' ? 'asc' : 'desc';
+            }
+            renderDetailTable();
         }
 
         // ==========================================
