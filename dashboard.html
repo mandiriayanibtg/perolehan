@@ -5,42 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Kinerja Produk</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library untuk mengambil screenshot HTML menjadi Gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        
         .table-scroll::-webkit-scrollbar { height: 8px; }
         .table-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
         .table-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 8px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen p-4 sm:p-6 lg:p-8">
+<body class="text-slate-800 antialiased min-h-screen p-4 sm:p-6 lg:p-8">
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+    <div class="max-w-[90rem] mx-auto space-y-8">
+        
+        <!-- HEADER UTAMA -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Kinerja Produk</h1>
-                <p class="text-slate-500 text-sm mt-1">Pilih tanggal untuk melihat pencapaian Harian, Mingguan (Batas Bulan), dan Bulanan.</p>
+                <p class="text-slate-500 text-sm mt-1">Pilih tanggal untuk melihat pencapaian Harian, Mingguan, dan Bulanan.</p>
             </div>
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl w-full sm:w-auto">
-                    <label for="filterTanggal" class="text-sm font-semibold text-slate-600 whitespace-nowrap">Filter Waktu:</label>
+                <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl w-full sm:w-auto shadow-sm">
+                    <label for="filterTanggal" class="text-sm font-bold text-slate-600 whitespace-nowrap">Filter Waktu:</label>
                     <input type="date" id="filterTanggal" onchange="prosesData()" class="bg-transparent text-slate-800 font-bold outline-none cursor-pointer">
                 </div>
-                <div class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl text-sm font-bold border border-blue-100 w-full sm:w-auto justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span id="lastUpdate">Memuat data...</span>
+                <div id="statusUpdate" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl text-sm font-bold border border-blue-100 w-full sm:w-auto justify-center transition-colors">
+                    <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Memuat...</span>
                 </div>
             </div>
         </div>
 
+        <!-- CONTAINER KARTU PRODUK -->
         <div id="product-container" class="space-y-8">
-            <div class="text-center py-20 text-slate-400 flex flex-col items-center">
-                <svg class="animate-spin h-10 w-10 mb-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                <p class="font-medium">Menghubungkan ke server...</p>
+            <!-- Loading State -->
+        </div>
+
+        <!-- SECTION: TABEL DETAIL AKUMULASI -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-12 relative" id="akumulasi-card">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 tracking-tight">Akumulasi Detail Pegawai</h2>
+                    <p class="text-slate-500 text-sm mt-1">Rekap perolehan semua pegawai per produk berdasarkan rentang tanggal.</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto" data-html2canvas-ignore="true">
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm p-1">
+                        <input type="date" id="startDateDetail" onchange="renderDetailTable()" class="text-sm px-3 py-1.5 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Awal">
+                        <span class="px-2 text-slate-400 text-sm font-bold">s/d</span>
+                        <input type="date" id="endDateDetail" onchange="renderDetailTable()" class="text-sm px-3 py-1.5 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Akhir">
+                    </div>
+                    <button onclick="salinGambarUtuh('akumulasi-card', this)" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Copy Gambar Tabel</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-scroll overflow-x-auto w-full rounded-xl border border-slate-200">
+                <table id="tabelDetailAkumulasi" class="w-full text-left border-collapse whitespace-nowrap bg-white">
+                    <!-- Tabel di-render via JavaScript -->
+                </table>
             </div>
         </div>
+
     </div>
 
+    <!-- SCRIPT UTAMA -->
     <script>
         // --- MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbz78FGxmizakrGRFn4sLEMdovqce11sr32vQKtuE-gHQClCLFp_QO95sg6jnPu0de6e/exec?action=getDashboardData'; 
@@ -51,26 +85,202 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             setTanggalFilterHariIni();
+            setTanggalFilterDetailDefault();
+            
             fetch(scriptURL)
                 .then(res => res.json())
                 .then(data => {
                     rawDataGlobal = data.input;
                     targetProdukGlobal = data.target; 
                     masterKaryawanGlobal = data.karyawan || {}; 
-                    document.getElementById('lastUpdate').innerText = "Live Update";
+                    
+                    const stat = document.getElementById('statusUpdate');
+                    stat.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span>Live Update</span>`;
+                    stat.classList.replace('bg-blue-50', 'bg-emerald-50');
+                    stat.classList.replace('text-blue-700', 'text-emerald-700');
+                    stat.classList.replace('border-blue-100', 'border-emerald-200');
+
                     prosesData(); 
+                    renderDetailTable();
                 })
                 .catch(err => {
-                    document.getElementById('product-container').innerHTML = `<div class="bg-red-50 text-red-600 p-6 rounded-xl border border-red-200 text-center"><h3 class="font-bold text-lg mb-2">Gagal Memuat Data</h3><p>Pastikan URL API benar dan koneksi internet stabil.</p></div>`;
+                    document.getElementById('statusUpdate').innerHTML = `<span class="text-rose-600">Gagal Memuat</span>`;
                 });
         });
 
         function setTanggalFilterHariIni() {
             const input = document.getElementById('filterTanggal');
             const d = new Date();
-            input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            input.value = d.toISOString().split('T')[0];
         }
 
+        function setTanggalFilterDetailDefault() {
+            const d = new Date();
+            document.getElementById('endDateDetail').value = d.toISOString().split('T')[0];
+            const awalBulan = new Date(d.getFullYear(), d.getMonth(), 1);
+            const yyyy = awalBulan.getFullYear();
+            const mm = String(awalBulan.getMonth() + 1).padStart(2, '0');
+            const dd = String(awalBulan.getDate()).padStart(2, '0');
+            document.getElementById('startDateDetail').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // ==========================================
+        // FUNGSI COPY/SALIN AJAIB UNTUK MOBILE & DESKTOP
+        // ==========================================
+        async function salinGambarUtuh(elementId, buttonElement) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            const originalHtml = buttonElement.innerHTML;
+            const originalClass = buttonElement.className;
+
+            // Efek Loading
+            buttonElement.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Memproses...</span>`;
+            buttonElement.disabled = true;
+
+            try {
+                // 1. Kloning elemen aslinya agar kita bisa otak-atik tampilannya tanpa merusak halaman asli
+                const clone = element.cloneNode(true);
+                
+                // 2. Hapus semua tombol copy yang ada di dalam kloningan agar tidak ikut terfoto
+                const ignoreElements = clone.querySelectorAll('[data-html2canvas-ignore="true"]');
+                ignoreElements.forEach(el => el.remove());
+
+                // 3. Buat pembungkus (wrapper) virtual yang ukurannya dipaksa lebar ala Desktop (1280px)
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'absolute';
+                wrapper.style.top = '-9999px';  // Sembunyikan di luar layar
+                wrapper.style.left = '-9999px';
+                wrapper.style.width = '1280px'; // Paksa tampil menjadi versi desktop
+                wrapper.style.padding = '10px';
+                wrapper.style.backgroundColor = '#f8fafc'; // Warna background Body
+                
+                // 4. Buka kunci semua scroll tabel yang terpotong di HP
+                const scrolls = clone.querySelectorAll('.overflow-x-auto, .table-scroll');
+                scrolls.forEach(sc => {
+                    sc.classList.remove('overflow-x-auto', 'table-scroll');
+                    sc.style.overflow = 'visible';
+                });
+
+                // Masukkan kloningan ke pembungkus virtual
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+
+                // 5. Fotokan pembungkus virtual tersebut menggunakan html2canvas
+                const canvas = await html2canvas(clone, {
+                    backgroundColor: '#ffffff', 
+                    scale: 2, // Kualitas HD agar tulisan tidak pecah
+                    useCORS: true,
+                    windowWidth: 1280 // Mengelabuhi CSS Tailwind agar menggunakan class khusus Desktop (xl:)
+                });
+
+                // 6. Buang pembungkus virtual dari halaman
+                document.body.removeChild(wrapper);
+
+                // 7. Simpan gambar ke clipboard (papan klip)
+                canvas.toBlob(async function(blob) {
+                    try {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        await navigator.clipboard.write([item]);
+                        
+                        // Efek Berhasil pada tombol
+                        buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span>Tersalin!</span>`;
+                        buttonElement.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
+                        
+                    } catch (err) {
+                        alert("Browser Anda tidak mendukung fitur copy gambar ke clipboard secara langsung.");
+                    } finally {
+                        setTimeout(() => {
+                            buttonElement.innerHTML = originalHtml;
+                            buttonElement.className = originalClass;
+                            buttonElement.disabled = false;
+                        }, 2500);
+                    }
+                });
+            } catch (error) {
+                alert("Terjadi kesalahan saat memproses gambar tabel.");
+                buttonElement.innerHTML = originalHtml;
+                buttonElement.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // LOGIKA RENDER TABEL DETAIL AKUMULASI
+        // ==========================================
+        function renderDetailTable() {
+            if (rawDataGlobal.length === 0 || Object.keys(targetProdukGlobal).length === 0) return;
+
+            const startDateVal = document.getElementById('startDateDetail').value;
+            const endDateVal = document.getElementById('endDateDetail').value;
+            
+            if (!startDateVal || !endDateVal) return;
+            
+            const start = new Date(startDateVal); start.setHours(0,0,0,0);
+            const end = new Date(endDateVal); end.setHours(23,59,59,999);
+            
+            const allProducts = Object.keys(targetProdukGlobal); 
+            const allEmployees = Object.keys(masterKaryawanGlobal);
+            
+            let akumulasi = {};
+            allEmployees.forEach(emp => {
+                akumulasi[emp] = {};
+                allProducts.forEach(prod => { akumulasi[emp][prod] = 0; });
+                akumulasi[emp]['TOTAL'] = 0;
+            });
+            
+            rawDataGlobal.forEach(row => {
+                if(!row.tanggal) return;
+                const tglData = new Date(row.tanggal);
+                tglData.setHours(0,0,0,0);
+                
+                if (tglData.getTime() >= start.getTime() && tglData.getTime() <= end.getTime()) {
+                    const prodName = row.product ? row.product.toUpperCase() : "";
+                    const empName = row.nama || "";
+                    if (allProducts.includes(prodName) && akumulasi[empName]) {
+                        akumulasi[empName][prodName]++;
+                        akumulasi[empName]['TOTAL']++;
+                    }
+                }
+            });
+
+            allEmployees.sort((a, b) => akumulasi[b]['TOTAL'] - akumulasi[a]['TOTAL']);
+            
+            let thead = `
+                <thead class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider font-bold">
+                    <tr>
+                        <th class="p-3 border-b border-r border-slate-200">Nama Pegawai</th>`;
+            allProducts.forEach(prod => {
+                thead += `<th class="p-3 border-b border-r border-slate-200 text-center">${prod}</th>`;
+            });
+            thead += `<th class="p-3 border-b border-slate-200 text-center bg-slate-200 text-slate-800">TOTAL</th></tr></thead>`;
+            
+            let tbody = `<tbody class="text-sm text-slate-700 divide-y divide-slate-100">`;
+            allEmployees.forEach(emp => {
+                let totalVal = akumulasi[emp]['TOTAL'];
+                let isNihil = totalVal === 0;
+                let textClass = isNihil ? "text-slate-400" : "text-slate-800 font-bold";
+                
+                tbody += `
+                    <tr>
+                        <td class="p-3 border-r border-slate-100 ${textClass}">${emp}</td>`;
+                
+                allProducts.forEach(prod => {
+                    let val = akumulasi[emp][prod];
+                    let valHtml = val === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${val}</span>`;
+                    tbody += `<td class="p-3 border-r border-slate-100 text-center">${valHtml}</td>`;
+                });
+                
+                let totalHtml = isNihil ? `<span class="text-slate-300">-</span>` : `<span class="font-black text-slate-800">${totalVal}</span>`;
+                tbody += `<td class="p-3 text-center bg-slate-50">${totalHtml}</td></tr>`;
+            });
+            tbody += `</tbody>`;
+            
+            document.getElementById('tabelDetailAkumulasi').innerHTML = thead + tbody;
+        }
+
+        // ==========================================
+        // LOGIKA RENDER DASHBOARD UTAMA
+        // ==========================================
         function prosesData() {
             if (rawDataGlobal.length === 0 && Object.keys(targetProdukGlobal).length === 0) return;
 
@@ -101,6 +311,7 @@
             if (endOfWeek > lastDayOfMonth) endOfWeek.setTime(lastDayOfMonth.getTime());
 
             const dataPerProduk = {};
+            const statusAbsenHarian = {}; 
 
             Object.keys(targetProdukGlobal).forEach(namaProduk => {
                 let initHarian = {};
@@ -122,12 +333,20 @@
 
             rawDataGlobal.forEach(row => {
                 const prodName = row.product ? row.product.toUpperCase() : "TIDAK DIKETAHUI";
-                if (!dataPerProduk[prodName]) return; 
-
+                const namaKaryawan = row.nama || "Tanpa Nama";
+                
                 if (!row.tanggal) return;
                 const tglData = new Date(row.tanggal);
                 tglData.setHours(0,0,0,0);
-                const namaKaryawan = row.nama || "Tanpa Nama";
+
+                if (['[CUTI]', '[SAKIT]', '[IZIN]', '[SHIFT_MALAM]'].includes(prodName)) {
+                    if (tglData.getTime() === baseDate.getTime()) {
+                        statusAbsenHarian[namaKaryawan] = prodName.replace(/\[|\]/g, '').replace('_', ' '); 
+                    }
+                    return; 
+                }
+
+                if (!dataPerProduk[prodName]) return; 
 
                 if (dataPerProduk[prodName].individuHarian[namaKaryawan] === undefined) {
                     dataPerProduk[prodName].individuHarian[namaKaryawan] = 0;
@@ -149,10 +368,10 @@
                 }
             });
 
-            renderDashboard(dataPerProduk, baseDate, startOfWeek, endOfWeek);
+            renderDashboard(dataPerProduk, baseDate, startOfWeek, endOfWeek, statusAbsenHarian);
         }
 
-        function renderDashboard(dataGroup, baseDate, startOfWeek, endOfWeek) {
+        function renderDashboard(dataGroup, baseDate, startOfWeek, endOfWeek, statusAbsenHarian) {
             const container = document.getElementById('product-container');
             container.innerHTML = '';
             
@@ -160,7 +379,12 @@
             const labelBulanIni = formatBulanLabel(baseDate);  
             const labelMingguIni = formatMingguLabel(startOfWeek, endOfWeek);
 
+            let counterId = 0;
+
             Object.keys(dataGroup).forEach(namaProduk => {
+                counterId++;
+                const cardId = `card-produk-${counterId}`;
+                
                 const data = dataGroup[namaProduk];
                 const target = targetProdukGlobal[namaProduk] || { daily: 0, weekly: 0, monthly: 0 };
 
@@ -178,44 +402,64 @@
 
                 let htmlIndividu = '';
                 arrIndividu.forEach(indv => {
+                    let isAbsen = statusAbsenHarian[indv.nama]; 
                     let isNihil = indv.bulanan === 0;
-                    let classRow = isNihil ? "text-slate-400" : "text-slate-700 font-medium";
-                    let labelHarian = indv.harian === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${indv.harian}</span>`;
-                    let labelBulanan = isNihil ? `<span class="bg-red-50 text-red-500 border border-red-100 px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide uppercase">Nihil</span>` : `<span class="font-bold text-slate-800">${indv.bulanan}</span>`;
+                    
+                    let classRow = isNihil && !isAbsen ? "text-slate-400" : "text-slate-700 font-medium";
+                    
+                    let labelHarian = '';
+                    if (isAbsen) {
+                        labelHarian = `<span class="bg-rose-100 text-rose-600 border border-rose-200 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">${isAbsen}</span>`;
+                    } else {
+                        labelHarian = indv.harian === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${indv.harian}</span>`;
+                    }
+
+                    let labelBulanan = isNihil ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-slate-800">${indv.bulanan}</span>`;
                         
                     htmlIndividu += `
-                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 text-sm">
-                        <td class="px-5 py-3.5 ${classRow}">${indv.nama}</td>
-                        <td class="px-5 py-3.5 text-center">${labelHarian}</td>
-                        <td class="px-5 py-3.5 text-center bg-slate-50/50">${labelBulanan}</td>
+                    <tr class="border-b border-slate-100 last:border-0 text-sm">
+                        <td class="px-4 py-2.5 ${classRow}">${indv.nama}</td>
+                        <td class="px-4 py-2.5 text-center">${labelHarian}</td>
+                        <td class="px-4 py-2.5 text-center bg-slate-50">${labelBulanan}</td>
                     </tr>`;
                 });
 
                 if(arrIndividu.length === 0) {
-                    htmlIndividu = `<tr><td colspan="3" class="px-5 py-4 text-center text-slate-400 italic">Tidak ada tim yang ditugaskan.</td></tr>`;
+                    htmlIndividu = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400 italic">Tidak ada tim yang ditugaskan.</td></tr>`;
                 }
 
-                const gapFormatter = (gapValue) => gapValue < 0 ? `<span class="text-red-600 font-extrabold">${gapValue}</span>` : `<span class="text-emerald-600 font-extrabold">${gapValue}</span>`;
+                const gapFormatter = (gapValue) => gapValue < 0 ? `<span class="text-red-600 font-bold">${gapValue}</span>` : `<span class="text-emerald-600 font-bold">${gapValue}</span>`;
 
                 const htmlCard = `
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row transition-shadow hover:shadow-md">
+                <div id="${cardId}" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col xl:flex-row relative">
                     
-                    <div class="md:w-56 bg-gradient-to-br from-blue-800 to-blue-900 text-white p-6 flex flex-col justify-center items-center shrink-0 border-b md:border-b-0 md:border-r border-blue-900/50">
-                        <h3 class="text-2xl font-black tracking-wider text-center drop-shadow-md">${namaProduk}</h3>
-                        <span class="text-sm font-medium text-blue-200 mt-3 bg-blue-900/40 px-3 py-1 rounded-full border border-blue-700/50">${labelHariIni}</span>
+                    <!-- TOMBOL COPY GLOBAL KARTU (Sembunyi otomatis saat dipotret html2canvas) -->
+                    <div class="absolute top-2 left-2 sm:top-4 sm:left-4 z-20" data-html2canvas-ignore="true">
+                        <button onclick="salinGambarUtuh('${cardId}', this)" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg> 
+                            <span class="hidden sm:inline">Copy Keseluruhan ${namaProduk}</span>
+                            <span class="sm:hidden">Copy</span>
+                        </button>
                     </div>
 
-                    <div class="flex-1 overflow-hidden flex flex-col">
+                    <!-- SIDE BANNER -->
+                    <div class="xl:w-64 bg-gradient-to-br from-blue-800 to-blue-900 text-white p-8 sm:p-6 flex flex-col justify-center items-center shrink-0 border-b xl:border-b-0 xl:border-r border-blue-900 pt-16 xl:pt-6">
+                        <h3 class="text-3xl font-black tracking-wider text-center">${namaProduk}</h3>
+                        <span class="text-xs font-medium text-blue-200 mt-2 bg-blue-950 px-3 py-1 rounded-full">${labelHariIni}</span>
+                    </div>
+
+                    <div class="flex-1 overflow-hidden flex flex-col bg-white">
                         
-                        <div class="table-scroll overflow-x-auto w-full border-b border-slate-200">
-                            <table class="w-full text-center border-collapse whitespace-nowrap">
+                        <!-- TABEL TARGET -->
+                        <div class="table-scroll overflow-x-auto w-full border-b border-slate-200 p-2 sm:p-0">
+                            <table class="w-full text-center border-collapse whitespace-nowrap bg-white">
                                 <thead>
                                     <tr>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase shadow-sm">Daily</th>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase shadow-sm">Weekly</th>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-blue-700 text-xs font-bold tracking-widest uppercase shadow-sm">Monthly</th>
+                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase">Daily</th>
+                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase">Weekly</th>
+                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-blue-700 text-xs font-bold tracking-widest uppercase">Monthly</th>
                                     </tr>
-                                    <tr class="bg-blue-50 text-blue-800 text-[11px] tracking-wider uppercase font-extrabold">
+                                    <tr class="bg-blue-50 text-blue-800 text-[10px] tracking-wider uppercase font-bold">
                                         <th class="p-2 border-b border-r border-blue-100">${labelHariIni}</th>
                                         <th class="p-2 border-b border-r border-blue-100">Target</th>
                                         <th class="p-2 border-b border-r border-blue-100">%</th>
@@ -230,38 +474,36 @@
                                         <th class="p-2 border-b border-blue-100">GAP</th>
                                     </tr>
                                 </thead>
-                                <tbody class="text-slate-700 text-sm">
+                                <tbody class="text-slate-800 text-sm">
                                     <tr class="bg-white">
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3.5 border-r border-slate-200 text-base shadow-inner">${data.perolehanHarian > 0 ? data.perolehanHarian : ''}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-semibold text-slate-500">${target.daily}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-bold">${pctDaily}%</td>
-                                        <td class="p-3.5 border-r border-slate-200 bg-slate-50/50">${gapFormatter(gapDaily)}</td>
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3.5 border-r border-slate-200 text-base shadow-inner">${data.perolehanMingguan > 0 ? data.perolehanMingguan : '-'}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-semibold text-slate-500">${target.weekly}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-bold">${pctWeekly}%</td>
-                                        <td class="p-3.5 border-r border-slate-200 bg-slate-50/50">${gapFormatter(gapWeekly)}</td>
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3.5 border-r border-slate-200 text-base shadow-inner">${data.perolehanBulanan > 0 ? data.perolehanBulanan : '-'}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-semibold text-slate-500">${target.monthly}</td>
-                                        <td class="p-3.5 border-r border-slate-200 font-bold">${pctMonthly}%</td>
-                                        <td class="p-3.5 bg-slate-50/50">${gapFormatter(gapMonthly)}</td>
+                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanHarian > 0 ? data.perolehanHarian : ''}</td>
+                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.daily}</td>
+                                        <td class="p-3 border-r border-slate-200 font-bold">${pctDaily}%</td>
+                                        <td class="p-3 border-r border-slate-200">${gapFormatter(gapDaily)}</td>
+                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanMingguan > 0 ? data.perolehanMingguan : '-'}</td>
+                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.weekly}</td>
+                                        <td class="p-3 border-r border-slate-200 font-bold">${pctWeekly}%</td>
+                                        <td class="p-3 border-r border-slate-200">${gapFormatter(gapWeekly)}</td>
+                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanBulanan > 0 ? data.perolehanBulanan : '-'}</td>
+                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.monthly}</td>
+                                        <td class="p-3 border-r border-slate-200 font-bold">${pctMonthly}%</td>
+                                        <td class="p-3">${gapFormatter(gapMonthly)}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         
-                        <div class="p-5 sm:p-6 bg-slate-50/30">
-                            <div class="flex items-center gap-2 mb-4 text-slate-700">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                <h4 class="font-bold text-sm tracking-wide">Tim Penanggung Jawab</h4>
-                            </div>
+                        <!-- TABEL TIM -->
+                        <div class="p-4 sm:p-5 bg-slate-50 flex-1">
+                            <h4 class="font-bold text-xs text-slate-600 uppercase tracking-wide mb-3">Tim Penanggung Jawab</h4>
                             
-                            <div class="overflow-x-auto">
-                                <table class="w-full max-w-2xl text-left border border-slate-200 bg-white rounded-xl shadow-sm overflow-hidden">
-                                    <thead class="bg-slate-100 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
+                            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                                <table class="w-full max-w-2xl text-left bg-white">
+                                    <thead class="bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
                                         <tr>
-                                            <th class="px-5 py-3.5 border-b border-slate-200">Nama</th>
-                                            <th class="px-5 py-3.5 border-b border-slate-200 text-center w-32 border-l border-slate-200">Total Harian</th>
-                                            <th class="px-5 py-3.5 border-b border-slate-200 text-center w-32 border-l border-slate-200 bg-slate-200/50">Total Bulanan</th>
+                                            <th class="px-4 py-2 border-b border-slate-200">Nama</th>
+                                            <th class="px-4 py-2 border-b border-slate-200 text-center border-l border-slate-200">Total Harian</th>
+                                            <th class="px-4 py-2 border-b border-slate-200 text-center border-l border-slate-200">Total Bulanan</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -278,7 +520,7 @@
             });
         }
 
-        const bulanSingkat = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const bulanSingkat = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
         function formatTanggalLabel(date) { return `${String(date.getDate()).padStart(2, '0')}-${bulanSingkat[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`; }
         function formatBulanLabel(date) { return `${bulanSingkat[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`; }
         function formatMingguLabel(start, end) { return `${String(start.getDate()).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')} ${bulanSingkat[start.getMonth()]}`; }
