@@ -230,18 +230,36 @@
                 // 6. Buang pembungkus virtual dari halaman
                 document.body.removeChild(wrapper);
 
-                // 7. Simpan gambar ke clipboard (papan klip)
+                // 7. Simpan gambar ke clipboard (papan klip) atau gunakan fallback untuk mobile
                 canvas.toBlob(async function(blob) {
                     try {
-                        const item = new ClipboardItem({ "image/png": blob });
-                        await navigator.clipboard.write([item]);
-                        
-                        // Efek Berhasil pada tombol
-                        buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span>Tersalin!</span>`;
-                        buttonElement.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
-                        
+                        if (navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+                            const item = new ClipboardItem({ "image/png": blob });
+                            await navigator.clipboard.write([item]);
+                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span>Tersalin!</span>`;
+                            buttonElement.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
+                        } else {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = 'capture-dashboard.png';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'capture-dashboard.png', { type: 'image/png' })] })) {
+                                await navigator.share({
+                                    title: 'Gambar Dashboard',
+                                    files: [new File([blob], 'capture-dashboard.png', { type: 'image/png' })]
+                                });
+                            }
+
+                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> <span>Disimpan / Dibagikan</span>`;
+                            buttonElement.className = "bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
+                        }
                     } catch (err) {
-                        alert("Browser Anda tidak mendukung fitur copy gambar ke clipboard secara langsung.");
+                        alert("Gambar berhasil dibuat, tetapi browser Anda belum mendukung fitur salin otomatis pada perangkat ini. Silakan simpan atau bagikan gambar manual.");
                     } finally {
                         setTimeout(() => {
                             buttonElement.innerHTML = originalHtml;
@@ -270,9 +288,11 @@
             
             const start = new Date(startDateVal); start.setHours(0,0,0,0);
             const end = new Date(endDateVal); end.setHours(23,59,59,999);
+            const isSingleDateRange = startDateVal === endDateVal;
             
             const allProducts = Object.keys(targetProdukGlobal); 
             const allEmployees = Object.keys(masterKaryawanGlobal);
+            const absensiInfo = {};
             
             let akumulasi = {};
             allEmployees.forEach(emp => {
@@ -289,6 +309,16 @@
                 if (tglData.getTime() >= start.getTime() && tglData.getTime() <= end.getTime()) {
                     const prodName = row.product ? row.product.toUpperCase() : "";
                     const empName = row.nama || "";
+                    const isAbsensi = ['[CUTI]', '[SAKIT]', '[IZIN]', '[SHIFT_MALAM]'].includes(prodName);
+
+                    if (isSingleDateRange && isAbsensi && empName && tglData.getTime() === start.getTime()) {
+                        const label = prodName.replace(/\[|\]/g, '').replace('_', ' ');
+                        absensiInfo[empName] = {
+                            label,
+                            note: String(row.notes || '').trim()
+                        };
+                    }
+
                     if (allProducts.includes(prodName) && akumulasi[empName]) {
                         akumulasi[empName][prodName]++;
                         akumulasi[empName]['TOTAL']++;
@@ -348,9 +378,13 @@
                 let isNihil = totalVal === 0;
                 let textClass = isNihil ? "text-slate-400" : "text-slate-800 font-bold";
                 
+                const absenDetail = isSingleDateRange && absensiInfo[emp] ? formatAbsensiNote(absensiInfo[emp]) : '';
                 tbody += `
                     <tr>
-                        <td class="p-3 border-r border-slate-100 ${textClass}">${emp}</td>`;
+                        <td class="p-3 border-r border-slate-100 ${textClass}">
+                            <div>${emp}</div>
+                            ${absenDetail ? `<div class="mt-1 text-[11px] font-semibold text-rose-600">${absenDetail}</div>` : ''}
+                        </td>`;
                 
                 allProducts.forEach(prod => {
                     const assignedProducts = (masterKaryawanGlobal[emp]?.produkAssign || [])
@@ -408,6 +442,11 @@
                 detailTableSortState.direction = field === 'name' ? 'asc' : 'desc';
             }
             renderDetailTable();
+        }
+
+        function formatAbsensiNote(info) {
+            const label = String(info.label || 'ABSEN').replace(/_/g, ' ');
+            return info.note ? `Absen: ${label} • ${info.note}` : `Absen: ${label}`;
         }
 
         // ==========================================
@@ -587,19 +626,19 @@
                             <table class="w-full text-center border-collapse whitespace-nowrap bg-white">
                                 <thead>
                                     <tr>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase">Daily</th>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r border-blue-700 text-xs font-bold tracking-widest uppercase">Weekly</th>
+                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r-4 border-blue-700 text-xs font-bold tracking-widest uppercase">Daily</th>
+                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r-4 border-blue-700 text-xs font-bold tracking-widest uppercase">Weekly</th>
                                         <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-blue-700 text-xs font-bold tracking-widest uppercase">Monthly</th>
                                     </tr>
                                     <tr class="bg-blue-50 text-blue-800 text-[10px] tracking-wider uppercase font-bold">
                                         <th class="p-2 border-b border-r border-blue-100">${labelHariIni}</th>
                                         <th class="p-2 border-b border-r border-blue-100">Target</th>
                                         <th class="p-2 border-b border-r border-blue-100">%</th>
-                                        <th class="p-2 border-b border-r border-blue-100">GAP</th>
+                                        <th class="p-2 border-b border-r-4 border-blue-100">GAP</th>
                                         <th class="p-2 border-b border-r border-blue-100">${labelMingguIni}</th>
                                         <th class="p-2 border-b border-r border-blue-100">Target</th>
                                         <th class="p-2 border-b border-r border-blue-100">%</th>
-                                        <th class="p-2 border-b border-r border-blue-100">GAP</th>
+                                        <th class="p-2 border-b border-r-4 border-blue-100">GAP</th>
                                         <th class="p-2 border-b border-r border-blue-100">${labelBulanIni}</th>
                                         <th class="p-2 border-b border-r border-blue-100">Target</th>
                                         <th class="p-2 border-b border-r border-blue-100">%</th>
@@ -611,11 +650,11 @@
                                         <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanHarian > 0 ? data.perolehanHarian : ''}</td>
                                         <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.daily}</td>
                                         <td class="p-3 border-r border-slate-200 font-bold">${pctDaily}%</td>
-                                        <td class="p-3 border-r border-slate-200">${gapFormatter(gapDaily)}</td>
+                                        <td class="p-3 border-r-4 border-slate-200">${gapFormatter(gapDaily)}</td>
                                         <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanMingguan > 0 ? data.perolehanMingguan : '-'}</td>
                                         <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.weekly}</td>
                                         <td class="p-3 border-r border-slate-200 font-bold">${pctWeekly}%</td>
-                                        <td class="p-3 border-r border-slate-200">${gapFormatter(gapWeekly)}</td>
+                                        <td class="p-3 border-r-4 border-slate-200">${gapFormatter(gapWeekly)}</td>
                                         <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanBulanan > 0 ? data.perolehanBulanan : '-'}</td>
                                         <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.monthly}</td>
                                         <td class="p-3 border-r border-slate-200 font-bold">${pctMonthly}%</td>
