@@ -28,7 +28,7 @@
 </head>
 <body class="text-slate-800 antialiased relative min-h-screen">
 
-    <!-- BACKGROUND ORIGINAL (TIDAK DIBLUR) -->
+    <!-- BACKGROUND ORIGINAL -->
     <div class="fixed inset-0 z-[-1]">
         <img src="bg.png" class="hidden sm:block h-full w-full object-cover" alt="Background Desktop" onerror="this.style.display='none'">
         <img src="bg2.png" class="block sm:hidden h-full w-full object-cover" alt="Background Mobile" onerror="this.style.display='none'">
@@ -57,15 +57,28 @@
 
                 <form id="perolehanForm" onsubmit="siapkanReview(this); return false;" class="space-y-6">
                     
-                    <!-- INPUT TANGGAL & NAMA -->
+                    <!-- MODE SWITCHER (TABS) -->
+                    <div class="bg-white/40 p-1.5 rounded-2xl flex gap-1 border border-white/50 shadow-inner backdrop-blur-md relative z-10">
+                        <button type="button" onclick="setMode('NORMAL')" id="btnModeNormal" class="flex-1 py-2.5 text-[11px] sm:text-xs font-bold rounded-xl bg-white text-blue-700 shadow-sm border border-slate-100 transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> Personal
+                        </button>
+                        <button type="button" onclick="setMode('PIC')" id="btnModePic" class="flex-1 py-2.5 text-[11px] sm:text-xs font-bold rounded-xl text-slate-600 hover:bg-white/50 hover:text-slate-800 transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Mode PIC
+                        </button>
+                        <button type="button" onclick="setMode('ABSEN')" id="btnModeAbsen" class="flex-1 py-2.5 text-[11px] sm:text-xs font-bold rounded-xl text-slate-600 hover:bg-white/50 hover:text-slate-800 transition-all flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Kehadiran
+                        </button>
+                    </div>
+
+                    <!-- INPUT TANGGAL & GLOBAL NAMA -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label for="tanggal" class="mb-2 block text-sm font-bold text-slate-800/90">Tanggal</label>
                             <input type="date" id="tanggal" name="tanggal" required class="w-full rounded-2xl border border-white/50 bg-white/50 px-4 py-3.5 text-slate-900 backdrop-blur-md transition-all focus:border-slate-400 focus:bg-white/70 focus:ring-4 focus:ring-slate-400/20 outline-none shadow-inner">
                         </div>
-                        <div class="relative">
+                        <div class="relative" id="wrapper-global-nama">
                             <label for="nama" class="mb-2 block text-sm font-bold text-slate-800/90">Nama Anda</label>
-                            <select id="nama" name="nama" required class="w-full rounded-2xl border border-white/50 bg-white/50 px-4 py-3.5 text-slate-900 backdrop-blur-md transition-all focus:border-slate-400 focus:bg-white/70 focus:ring-4 focus:ring-slate-400/20 outline-none cursor-pointer shadow-inner">
+                            <select id="nama" name="nama" class="w-full rounded-2xl border border-white/50 bg-white/50 px-4 py-3.5 text-slate-900 backdrop-blur-md transition-all focus:border-slate-400 focus:bg-white/70 focus:ring-4 focus:ring-slate-400/20 outline-none cursor-pointer shadow-inner">
                                 <option class="bg-white text-slate-900" value="" disabled selected>Memuat data...</option>
                             </select>
                             <div class="absolute right-4 top-11 pointer-events-none text-slate-600">
@@ -74,24 +87,17 @@
                         </div>
                     </div>
 
-                    <!-- TOGGLE KEHADIRAN -->
-                    <div class="text-right -mt-3">
-                        <button type="button" id="btnToggleKehadiran" onclick="toggleModeKehadiran()" class="text-xs text-indigo-700/80 hover:text-indigo-800 font-bold underline underline-offset-4 transition-colors">
-                            Tidak masuk hari ini? Cuti/Sakit/Izin/Shift
-                        </button>
-                    </div>
-
-                    <!-- DIVIDER -->
                     <div class="flex items-center gap-3">
                         <div class="h-px flex-1 bg-slate-400/20"></div>
                         <span id="labelSeparator" class="text-[11px] font-bold tracking-widest text-slate-500 uppercase">Produk & Catatan</span>
                         <div class="h-px flex-1 bg-slate-400/20"></div>
                     </div>
 
-                    <!-- SECTION: INPUT PRODUK (NORMAL) -->
+                    <!-- ======================================= -->
+                    <!-- SECTION 1: INPUT PRODUK (NORMAL)        -->
+                    <!-- ======================================= -->
                     <div id="section-produk" class="space-y-5">
                         <div id="dynamic-items-container" class="space-y-5">
-                            
                             <div class="item-card relative rounded-3xl border border-white/60 bg-white/40 p-5 pt-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)] backdrop-blur-lg transition-all">
                                 <div class="product-badge absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-white text-xs font-black shadow-md border border-slate-700">1</div>
                                 
@@ -120,20 +126,77 @@
                                         </div>
                                     </div>
                                     <button type="button" class="w-full mt-3 py-2.5 rounded-xl border-2 border-dashed border-slate-300 bg-white/30 text-sm font-bold text-slate-600 hover:bg-white/60 hover:border-slate-400 transition-all flex items-center justify-center gap-2" onclick="tambahNote(this)">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                        Tambah Catatan Lain
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Catatan Lain
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        
                         <button type="button" id="btnTambahProduk" class="w-full py-3.5 rounded-2xl border border-white/60 bg-white/60 text-sm font-bold text-slate-800 hover:bg-white/80 transition-all flex items-center justify-center gap-2 shadow-sm" onclick="tambahProduk()">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                            Tambah Produk Berbeda
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg> Tambah Produk Berbeda
                         </button>
                     </div>
 
-                    <!-- SECTION: INPUT KEHADIRAN -->
+                    <!-- ======================================= -->
+                    <!-- SECTION 2: INPUT MODE PIC               -->
+                    <!-- ======================================= -->
+                    <div id="section-pic" class="hidden space-y-5">
+                        
+                        <!-- Global Product Selection -->
+                        <div class="relative bg-blue-50/70 border border-blue-200/60 p-4 rounded-3xl shadow-sm">
+                            <label class="mb-2 block text-sm font-bold text-blue-900">Produk Global (Berlaku untuk semua)</label>
+                            <select id="picGlobalProduct" class="w-full rounded-xl border border-white/50 bg-white px-4 py-3.5 text-slate-900 transition-all outline-none cursor-pointer shadow-sm">
+                                <option class="bg-white text-slate-900" value="" disabled selected>Memuat produk...</option>
+                            </select>
+                            <div class="absolute right-8 top-[3.25rem] pointer-events-none text-slate-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic PIC Items Container -->
+                        <div id="pic-dynamic-items-container" class="space-y-4">
+                            <div class="pic-item-card relative rounded-3xl border border-white/60 bg-white/40 p-5 pt-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)] backdrop-blur-lg transition-all">
+                                <div class="pic-badge absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-black shadow-md border border-blue-500">1</div>
+                                
+                                <button type="button" class="hidden btn-remove-pic absolute -top-3 -right-3 flex h-8 w-8 items-center justify-center rounded-full bg-red-100 border border-red-200 text-red-600 hover:bg-red-500 hover:text-white transition-colors shadow-md" onclick="hapusElemen(this, '.pic-item-card')" title="Hapus Pegawai">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                    <div class="relative">
+                                        <label class="mb-2 block text-sm font-bold text-slate-800/90">Nama Pegawai</label>
+                                        <select class="pic-emp-input w-full rounded-2xl border border-white/50 bg-white/50 px-4 py-3.5 text-slate-900 backdrop-blur-md transition-all focus:border-blue-400 focus:bg-white/70 focus:ring-4 focus:ring-blue-400/20 outline-none cursor-pointer shadow-inner">
+                                            <option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama --</option>
+                                        </select>
+                                        <div class="absolute right-4 top-[2.65rem] pointer-events-none text-slate-500">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="mb-2 block text-sm font-bold text-slate-800/90">Keterangan <span class="font-normal text-slate-500">(p.5)</span></label>
+                                        <div class="pic-notes-wrapper space-y-3">
+                                            <div class="pic-note-item flex gap-2 items-start">
+                                                <textarea class="pic-notes-input flex-1 min-h-[50px] w-full rounded-2xl border border-white/50 bg-white/50 px-4 py-3.5 text-sm text-slate-900 placeholder:text-slate-500 backdrop-blur-md transition-all focus:border-blue-400 focus:bg-white/70 focus:ring-4 focus:ring-blue-400/20 outline-none shadow-inner" placeholder="Catatan..." rows="1"></textarea>
+                                                <button type="button" class="btn-remove-pic-note hidden p-3 rounded-2xl bg-red-100 border border-red-200 text-red-600 hover:bg-red-500 hover:text-white transition-colors" onclick="hapusElemen(this, '.pic-note-item')" title="Hapus catatan ini">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="w-full mt-3 py-2 rounded-xl border-2 border-dashed border-slate-300 bg-white/30 text-xs font-bold text-slate-600 hover:bg-white/60 hover:border-slate-400 transition-all flex items-center justify-center gap-2" onclick="tambahPicNote(this)">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Catatan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="w-full py-3.5 rounded-2xl border border-blue-300 bg-blue-50/80 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md" onclick="tambahPicItem()">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg> Tambah Pegawai Lain
+                        </button>
+                    </div>
+
+                    <!-- ======================================= -->
+                    <!-- SECTION 3: INPUT KEHADIRAN              -->
+                    <!-- ======================================= -->
                     <div id="section-kehadiran" class="hidden space-y-5">
                         <div class="rounded-3xl border border-indigo-200 bg-indigo-50/60 p-6 shadow-sm backdrop-blur-lg">
                             <div class="relative mb-5">
@@ -166,12 +229,14 @@
         </main>
     </div>
 
+    <!-- TOMBOL NAVIGASI MELAYANG (FAB) -->
     <button type="button" id="navFab" onclick="openNavModal()" class="fixed bottom-5 right-5 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_12px_30px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 hover:bg-slate-800" aria-label="Buka menu navigasi">
         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
     </button>
 
+    <!-- MODAL MENU NAVIGASI -->
     <div id="navModal" class="hidden fixed inset-0 z-[75] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal('navModal')"></div>
         <div class="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/60 bg-white/90 p-5 shadow-[0_25px_80px_rgba(0,0,0,.3)] backdrop-blur-2xl transform scale-95 transition-transform duration-300">
@@ -185,28 +250,27 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <button type="button" onclick="navigateToPage('dashboard.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Dashboard</button>
-                <button type="button" onclick="navigateToPage('admin.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Admin</button>
+                <button type="button" onclick="navigateToPage('dashboard.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100 flex justify-between items-center">
+                    Dashboard Kinerja
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <button type="button" onclick="navigateToPage('admin.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100 flex justify-between items-center">
+                    Admin Panel
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL REVIEW (BARU) -->
+    <!-- PENGGANTI MODAL REVIEW & STATUS -->
     <div id="reviewModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal('reviewModal')"></div>
         <div class="relative w-full max-w-md overflow-hidden rounded-[32px] border border-white/60 bg-white/80 p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,.3)] backdrop-blur-3xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
-            
             <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
                 <h3 class="font-display text-xl font-bold text-slate-900">Review Data</h3>
                 <button onclick="closeModal('reviewModal')" class="text-slate-400 hover:text-rose-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
-
-            <!-- Area scrollable untuk data -->
-            <div class="overflow-y-auto custom-scrollbar flex-1 pr-2 mb-4" id="reviewContentArea">
-                <!-- Rangkuman di-generate JS -->
-            </div>
-
-            <!-- Tombol Aksi -->
+            <div class="overflow-y-auto custom-scrollbar flex-1 pr-2 mb-4" id="reviewContentArea"></div>
             <div class="flex gap-3 pt-4 border-t border-slate-200 mt-auto">
                 <button onclick="closeModal('reviewModal')" class="flex-1 rounded-2xl bg-slate-100 border border-slate-300 py-3.5 font-bold text-slate-700 hover:bg-slate-200 transition-colors">Edit Lagi</button>
                 <button id="btnConfirmKirim" onclick="executeSubmit()" class="flex-1 rounded-2xl bg-emerald-600 py-3.5 font-bold text-white hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/30">Kirim Sekarang</button>
@@ -214,7 +278,6 @@
         </div>
     </div>
 
-    <!-- MODAL SUKSES & ERROR (Disempurnakan untuk tema terang) -->
     <div id="successModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal('successModal')"></div>
         <div class="relative w-full max-w-sm overflow-hidden rounded-[32px] border border-white/60 bg-white/90 p-8 text-center shadow-[0_25px_80px_rgba(0,0,0,.3)] backdrop-blur-2xl transform scale-95 transition-transform duration-300">
@@ -249,10 +312,11 @@
         let mapKaryawan = {}; 
         let semuaProdukList = [];
         let opsiProdukCurrent = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama Anda Terlebih Dahulu --</option>';
-        let isModeKehadiran = false; 
+        let opsiGlobalProduk = '<option class="bg-white text-slate-900" value="" disabled selected>Pilih Produk...</option>';
+        let opsiSemuaKaryawan = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama --</option>';
         
-        // Objek untuk menampung data sementara sebelum dikirim
-        let pendingFormData = null;
+        let currentMode = 'NORMAL'; // 'NORMAL', 'PIC', 'ABSEN'
+        let pendingFormDataArray = []; // Array of payloads
 
         window.addEventListener('DOMContentLoaded', () => {
             setTanggalHariIni();
@@ -264,33 +328,64 @@
                 perbaruiSapaanNama(this.value);
             });
 
-            document.getElementById('dynamic-items-container').addEventListener('input', function(e) {
-                if (e.target.classList.contains('notes-input')) {
+            // Handle Textarea Auto-resize for Normal and PIC Mode
+            document.body.addEventListener('input', function(e) {
+                if (e.target.classList.contains('notes-input') || e.target.classList.contains('pic-notes-input')) {
                     e.target.style.height = 'auto';
                     e.target.style.height = e.target.scrollHeight + 'px';
                 }
             });
         });
 
-        function toggleModeKehadiran() {
-            isModeKehadiran = !isModeKehadiran;
-            const secProduk = document.getElementById('section-produk');
-            const secKehadiran = document.getElementById('section-kehadiran');
-            const btnToggle = document.getElementById('btnToggleKehadiran');
-            const labelSep = document.getElementById('labelSeparator');
+        // =====================================
+        // TAB MODE SWITCHER LOGIC
+        // =====================================
+        function setMode(mode) {
+            currentMode = mode;
+            
+            const btnN = document.getElementById('btnModeNormal');
+            const btnP = document.getElementById('btnModePic');
+            const btnA = document.getElementById('btnModeAbsen');
+            
+            const activeClass = ['bg-white', 'text-blue-700', 'shadow-sm', 'border', 'border-slate-100'];
+            const inactiveClass = ['text-slate-600', 'hover:bg-white/50', 'hover:text-slate-800'];
+            
+            [btnN, btnP, btnA].forEach(b => {
+                b.classList.remove(...activeClass);
+                b.classList.add(...inactiveClass);
+            });
 
-            if (isModeKehadiran) {
-                secProduk.classList.add('hidden');
-                secKehadiran.classList.remove('hidden');
-                btnToggle.innerText = "Batal, kembali ke input produk";
-                btnToggle.classList.replace('text-indigo-700/80', 'text-slate-500');
-                labelSep.innerText = "Keterangan Absensi";
-            } else {
-                secProduk.classList.remove('hidden');
-                secKehadiran.classList.add('hidden');
-                btnToggle.innerText = "Tidak masuk hari ini? Cuti/Sakit/Izin/Shift";
-                btnToggle.classList.replace('text-slate-500', 'text-indigo-700/80');
-                labelSep.innerText = "Produk & Catatan";
+            const secNormal = document.getElementById('section-produk');
+            const secPic = document.getElementById('section-pic');
+            const secAbsen = document.getElementById('section-kehadiran');
+            const wrapGlobalNama = document.getElementById('wrapper-global-nama');
+            const sepLabel = document.getElementById('labelSeparator');
+
+            secNormal.classList.add('hidden');
+            secPic.classList.add('hidden');
+            secAbsen.classList.add('hidden');
+
+            if (mode === 'NORMAL') {
+                btnN.classList.remove(...inactiveClass); btnN.classList.add(...activeClass);
+                wrapGlobalNama.classList.remove('hidden');
+                secNormal.classList.remove('hidden');
+                sepLabel.innerText = "Produk & Catatan";
+                document.getElementById('tanggal').parentElement.classList.remove('sm:col-span-2');
+            } 
+            else if (mode === 'PIC') {
+                btnP.classList.remove(...inactiveClass); btnP.classList.add(...activeClass);
+                wrapGlobalNama.classList.add('hidden'); 
+                secPic.classList.remove('hidden');
+                sepLabel.innerText = "Produk & Input Massal";
+                document.getElementById('tanggal').parentElement.classList.add('sm:col-span-2'); 
+                populatePicDropdowns(); 
+            } 
+            else if (mode === 'ABSEN') {
+                btnA.classList.remove(...inactiveClass); btnA.classList.add(...activeClass);
+                wrapGlobalNama.classList.remove('hidden');
+                secAbsen.classList.remove('hidden');
+                sepLabel.innerText = "Keterangan Kehadiran";
+                document.getElementById('tanggal').parentElement.classList.remove('sm:col-span-2');
             }
         }
 
@@ -331,9 +426,20 @@
                 .then(data => {
                     mapKaryawan = data.nama || {};
                     semuaProdukList = data.produk || [];
+                    
                     const selectNama = document.getElementById('nama');
                     selectNama.innerHTML = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama Anda --</option>';
                     Object.keys(mapKaryawan).forEach(nama => selectNama.insertAdjacentHTML('beforeend', `<option class="bg-white text-slate-900" value="${nama}">${nama}</option>`));
+                    
+                    // Siapkan opsi global PIC
+                    opsiSemuaKaryawan = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama --</option>';
+                    Object.keys(mapKaryawan).forEach(nama => opsiSemuaKaryawan += `<option class="bg-white text-slate-900" value="${nama}">${nama}</option>`);
+                    
+                    opsiGlobalProduk = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Produk Global --</option>';
+                    semuaProdukList.forEach(p => opsiGlobalProduk += `<option class="bg-white text-slate-900" value="${p}">${p}</option>`);
+                    document.getElementById('picGlobalProduct').innerHTML = opsiGlobalProduk;
+                    
+                    populatePicDropdowns(); 
                 })
                 .catch(error => showModal('errorModal', 'Gagal memuat API. Pastikan internet stabil.'));
         }
@@ -350,48 +456,91 @@
             document.querySelectorAll('.product-input').forEach(select => { select.innerHTML = opsiProdukCurrent; });
         }
 
+        // =====================================
+        // LOGIKA NORMAL MODE
+        // =====================================
         function tambahProduk() {
-            if(!document.getElementById('nama').value) {
-                showModal('errorModal', "Silakan pilih Nama Anda terlebih dahulu!"); return;
-            }
+            if(!document.getElementById('nama').value) { showModal('errorModal', "Pilih Nama Anda dulu!"); return; }
             const container = document.getElementById('dynamic-items-container');
             const template = container.querySelector('.item-card');
             const kartuBaru = template.cloneNode(true);
             kartuBaru.querySelector('.product-input').innerHTML = opsiProdukCurrent;
             kartuBaru.querySelector('.product-input').value = '';
             
-            const notesWrapper = kartuBaru.querySelector('.notes-wrapper');
-            const semuaNotes = notesWrapper.querySelectorAll('.note-item');
+            const semuaNotes = kartuBaru.querySelectorAll('.note-item');
             for(let i = 1; i < semuaNotes.length; i++) semuaNotes[i].remove(); 
             
-            const notePertama = notesWrapper.querySelector('.note-item');
+            const notePertama = kartuBaru.querySelector('.note-item');
             notePertama.querySelector('.notes-input').value = '';
-            notePertama.querySelector('.notes-input').removeAttribute('style');
             notePertama.querySelector('.btn-remove-note').classList.add('hidden');
-
             kartuBaru.querySelector('.btn-remove-product').classList.remove('hidden');
+            
             container.appendChild(kartuBaru);
-            renomorProduk();
-            kartuBaru.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            renomorBadge('.item-card', '.product-badge');
         }
 
         function tambahNote(btnElement) {
             const notesWrapper = btnElement.previousElementSibling; 
             const noteBaru = notesWrapper.querySelector('.note-item').cloneNode(true);
             noteBaru.querySelector('.notes-input').value = ''; 
-            noteBaru.querySelector('.notes-input').removeAttribute('style');
+            noteBaru.querySelector('.notes-input').style.height = 'auto';
             noteBaru.querySelector('.btn-remove-note').classList.remove('hidden'); 
             notesWrapper.appendChild(noteBaru);
         }
 
-        function hapusElemen(btnElement, targetClass) {
-            btnElement.closest(targetClass).remove();
-            if (targetClass === '.item-card') renomorProduk();
+        // =====================================
+        // LOGIKA PIC MODE
+        // =====================================
+        function populatePicDropdowns() {
+            document.querySelectorAll('.pic-emp-input').forEach(select => { 
+                if(select.innerHTML.trim() === "" || select.options.length <= 1) { select.innerHTML = opsiSemuaKaryawan; }
+            });
         }
 
-        function renomorProduk() {
-            document.querySelectorAll('.item-card').forEach((kartu, idx) => {
-                const badge = kartu.querySelector('.product-badge');
+        function tambahPicItem() {
+            const container = document.getElementById('pic-dynamic-items-container');
+            const template = container.querySelector('.pic-item-card');
+            const kartuBaru = template.cloneNode(true);
+            
+            kartuBaru.querySelector('.pic-emp-input').value = '';
+            
+            // Hapus tambahan catatan sebelumnya (reset ke 1 textarea saja)
+            const notesWrapper = kartuBaru.querySelector('.pic-notes-wrapper');
+            const semuaNotes = notesWrapper.querySelectorAll('.pic-note-item');
+            for(let i = 1; i < semuaNotes.length; i++) semuaNotes[i].remove(); 
+            
+            const notePertama = notesWrapper.querySelector('.pic-note-item');
+            notePertama.querySelector('.pic-notes-input').value = '';
+            notePertama.querySelector('.pic-notes-input').style.height = 'auto';
+            notePertama.querySelector('.btn-remove-pic-note').classList.add('hidden');
+
+            kartuBaru.querySelector('.btn-remove-pic').classList.remove('hidden');
+            
+            container.appendChild(kartuBaru);
+            renomorBadge('.pic-item-card', '.pic-badge');
+        }
+
+        function tambahPicNote(btnElement) {
+            const notesWrapper = btnElement.previousElementSibling; 
+            const noteBaru = notesWrapper.querySelector('.pic-note-item').cloneNode(true);
+            noteBaru.querySelector('.pic-notes-input').value = ''; 
+            noteBaru.querySelector('.pic-notes-input').style.height = 'auto';
+            noteBaru.querySelector('.btn-remove-pic-note').classList.remove('hidden'); 
+            notesWrapper.appendChild(noteBaru);
+        }
+
+        // =====================================
+        // UTILITY UMUM & NAVIGASI
+        // =====================================
+        function hapusElemen(btnElement, targetClass) {
+            btnElement.closest(targetClass).remove();
+            if (targetClass === '.item-card') renomorBadge('.item-card', '.product-badge');
+            if (targetClass === '.pic-item-card') renomorBadge('.pic-item-card', '.pic-badge');
+        }
+
+        function renomorBadge(cardSelector, badgeSelector) {
+            document.querySelectorAll(cardSelector).forEach((kartu, idx) => {
+                const badge = kartu.querySelector(badgeSelector);
                 if (badge) badge.textContent = idx + 1;
             });
         }
@@ -426,120 +575,185 @@
             }, 250);
         }
 
-        // FUNGSI 1: MENGUMPULKAN DATA DAN MEMUNCULKAN MODAL REVIEW
+        // =====================================
+        // PREPARE & SUBMIT DATA SECARA BERURUTAN
+        // =====================================
         function siapkanReview(formObj) {
-            const arrayItems = [];
-            
-            if (isModeKehadiran) {
+            pendingFormDataArray = []; // Reset Buffer
+            const tglVal = formObj.tanggal.value;
+
+            if (currentMode === 'ABSEN') {
                 const statusValue = document.getElementById('statusAbsen').value;
                 const catatanValue = document.getElementById('catatanAbsen').value.trim();
-                arrayItems.push({ product: statusValue, notes: catatanValue === "" ? "-" : catatanValue });
-            } else {
+                const namaTerpilih = formObj.nama.value;
+                if(!namaTerpilih) { showModal('errorModal', "Pilih Nama Anda!"); return; }
+                
+                pendingFormDataArray.push({
+                    tanggal: tglVal, nama: namaTerpilih, role: mapKaryawan[namaTerpilih] ? mapKaryawan[namaTerpilih].role : "",
+                    items: [{ product: statusValue, notes: catatanValue === "" ? "-" : catatanValue }]
+                });
+            } 
+            else if (currentMode === 'NORMAL') {
+                const namaTerpilih = formObj.nama.value;
+                if(!namaTerpilih) { showModal('errorModal', "Pilih Nama Anda!"); return; }
+                const arrayItems = [];
+
                 document.querySelectorAll('.item-card').forEach(kartu => {
                     const productVal = kartu.querySelector('.product-input').value;
+                    if(!productVal) return;
                     kartu.querySelectorAll('.notes-input').forEach(noteInput => {
                         let isiNote = noteInput.value.trim();
                         let matchMultiplier = isiNote.match(/^p\.\s*(\d+)$/i);
-                        
                         if (matchMultiplier) {
                             let jumlahData = parseInt(matchMultiplier[1], 10);
-                            for (let j = 0; j < jumlahData; j++) {
-                                arrayItems.push({ product: productVal, notes: "0" });
-                            }
+                            for (let j = 0; j < jumlahData; j++) { arrayItems.push({ product: productVal, notes: "0" }); }
                         } else {
                             arrayItems.push({ product: productVal, notes: isiNote === "" ? "0" : isiNote });
                         }
                     });
                 });
+                if(arrayItems.length === 0) { showModal('errorModal', "Pilih minimal 1 produk!"); return; }
+                
+                pendingFormDataArray.push({
+                    tanggal: tglVal, nama: namaTerpilih, role: mapKaryawan[namaTerpilih] ? mapKaryawan[namaTerpilih].role : "",
+                    items: arrayItems
+                });
+            }
+            else if (currentMode === 'PIC') {
+                const globalProduct = document.getElementById('picGlobalProduct').value;
+                if(!globalProduct) { showModal('errorModal', "Pilih Produk Global!"); return; }
+                
+                let mapEmpItems = {}; 
+                let hasValidData = false;
+
+                document.querySelectorAll('.pic-item-card').forEach(kartu => {
+                    const empName = kartu.querySelector('.pic-emp-input').value;
+                    if(!empName) return; 
+                    hasValidData = true;
+
+                    if(!mapEmpItems[empName]) mapEmpItems[empName] = [];
+                    
+                    kartu.querySelectorAll('.pic-notes-input').forEach(noteInput => {
+                        let isiNote = noteInput.value.trim();
+                        let matchMultiplier = isiNote.match(/^p\.\s*(\d+)$/i);
+                        if (matchMultiplier) {
+                            let jumlahData = parseInt(matchMultiplier[1], 10);
+                            for (let j = 0; j < jumlahData; j++) { mapEmpItems[empName].push({ product: globalProduct, notes: "0" }); }
+                        } else {
+                            mapEmpItems[empName].push({ product: globalProduct, notes: isiNote === "" ? "0" : isiNote });
+                        }
+                    });
+                });
+
+                if(!hasValidData) { showModal('errorModal', "Pilih minimal 1 nama pegawai!"); return; }
+
+                Object.keys(mapEmpItems).forEach(emp => {
+                    pendingFormDataArray.push({
+                        tanggal: tglVal, nama: emp, role: mapKaryawan[emp] ? mapKaryawan[emp].role : "",
+                        items: mapEmpItems[emp]
+                    });
+                });
             }
 
-            const namaTerpilih = formObj.nama.value;
-            pendingFormData = {
-                tanggal: formObj.tanggal.value,
-                nama: namaTerpilih,
-                role: mapKaryawan[namaTerpilih] ? mapKaryawan[namaTerpilih].role : "", 
-                items: arrayItems
-            };
-
-            // BUILD HTML UNTUK REVIEW
+            // BUILD HTML REVIEW UI DARI ARRAY
             let htmlReview = `
-                <div class="bg-slate-100/50 p-4 rounded-2xl border border-slate-200 mb-4">
-                    <p class="text-sm"><span class="text-slate-500 block mb-0.5">Tanggal:</span> <strong class="text-slate-800 text-base">${pendingFormData.tanggal}</strong></p>
-                    <p class="text-sm mt-3"><span class="text-slate-500 block mb-0.5">Nama Pegawai:</span> <strong class="text-slate-800 text-base">${pendingFormData.nama}</strong></p>
+                <div class="bg-slate-100/50 p-4 rounded-2xl border border-slate-200 mb-4 flex justify-between items-center">
+                    <div><span class="text-slate-500 block text-xs font-bold uppercase mb-0.5">Tanggal Perolehan:</span> <strong class="text-slate-800 text-lg">${tglVal}</strong></div>
+                    <div class="text-right"><span class="text-slate-500 block text-xs font-bold uppercase mb-0.5">Mode:</span> <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs font-bold text-blue-600">${currentMode}</span></div>
                 </div>
-                <h4 class="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">Detail Data (${pendingFormData.items.length} item)</h4>
-                <ul class="space-y-2">
             `;
 
-            pendingFormData.items.forEach((item, index) => {
-                let badgeColor = (['[CUTI]', '[SAKIT]', '[IZIN]', '[SHIFT_MALAM]'].includes(item.product)) 
-                                 ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700';
+            pendingFormDataArray.forEach(payload => {
+                htmlReview += `<h4 class="font-bold text-slate-800 mt-5 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">${payload.nama} <span class="text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-md shadow-sm">${payload.items.length} Data</span></h4>`;
+                htmlReview += `<ul class="space-y-2">`;
                 
-                htmlReview += `
-                    <li class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-1.5">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400">#${index+1}</span>
-                            <span class="px-2 py-0.5 rounded text-xs font-bold ${badgeColor}">${item.product}</span>
-                        </div>
-                        <span class="text-sm text-slate-600 ml-6">Catatan: <strong class="text-slate-800 font-medium">${item.notes}</strong></span>
-                    </li>
-                `;
+                payload.items.forEach((item, index) => {
+                    let badgeColor = (['[CUTI]', '[SAKIT]', '[IZIN]', '[SHIFT_MALAM]'].includes(item.product)) 
+                                     ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700';
+                    htmlReview += `
+                        <li class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-400">#${index+1}</span>
+                                <span class="px-2 py-0.5 rounded text-xs font-bold ${badgeColor}">${item.product}</span>
+                            </div>
+                            <span class="text-sm text-slate-600 ml-6">Catatan: <strong class="text-slate-800 font-medium">${item.notes}</strong></span>
+                        </li>
+                    `;
+                });
+                htmlReview += `</ul>`;
             });
-            htmlReview += `</ul>`;
 
             document.getElementById('reviewContentArea').innerHTML = htmlReview;
             showModal('reviewModal');
         }
 
-        // FUNGSI 2: EKSEKUSI PENGIRIMAN (DARI MODAL REVIEW)
-        function executeSubmit() {
-            if(!pendingFormData) return;
+        // Eksekusi secara sekuensial (satu per satu) agar aman dari limitasi Google Apps Script
+        async function executeSubmit() {
+            if(pendingFormDataArray.length === 0) return;
 
             const btn = document.getElementById('btnConfirmKirim');
             const originalBtnHtml = btn.innerHTML;
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
             btn.disabled = true;
 
-            fetch(scriptURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(pendingFormData)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if(result.status === 'sukses') { 
+            let allSuccess = true;
+            let totalData = pendingFormDataArray.length;
+
+            try {
+                for (let i = 0; i < totalData; i++) {
+                    btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses (${i+1}/${totalData})...`;
+                    
+                    const payload = pendingFormDataArray[i];
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    if(result.status !== 'sukses') {
+                        allSuccess = false;
+                    }
+                }
+
+                if(allSuccess) { 
                     closeModal('reviewModal');
-                    setTimeout(() => {
-                        resetFormState(document.getElementById('perolehanForm')); 
-                        showModal('successModal'); 
-                    }, 300);
+                    setTimeout(() => { resetFormState(); showModal('successModal'); }, 300);
                 } else {
                     closeModal('reviewModal');
-                    setTimeout(() => showModal('errorModal', "Error server: " + result.pesan), 300);
+                    setTimeout(() => showModal('errorModal', "Sebagian data gagal disimpan."), 300);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 closeModal('reviewModal');
                 setTimeout(() => showModal('errorModal', "Gagal menghubungi server."), 300);
-            })
-            .finally(() => { 
+            } finally {
                 btn.innerHTML = originalBtnHtml; 
                 btn.disabled = false; 
-                pendingFormData = null; // Reset buffer
-            });
+                pendingFormDataArray = []; 
+            }
         }
 
-        function resetFormState(formObj) {
-            formObj.reset();
-            setTanggalHariIni();
+        function resetFormState() {
+            const f = document.getElementById('perolehanForm');
+            f.reset(); setTanggalHariIni();
+            
+            // Reset Dynamic Item Mode Normal
             document.querySelectorAll('.item-card').forEach((k, i) => { if(i > 0) k.remove(); });
             document.querySelector('.item-card').querySelectorAll('.note-item').forEach((n, i) => { if(i > 0) n.remove(); });
             document.querySelector('.product-input').innerHTML = '<option class="bg-white text-slate-900" value="" disabled selected>-- Pilih Nama Anda Terlebih Dahulu --</option>';
-            document.querySelector('.notes-input').removeAttribute('style');
+            document.querySelector('.notes-input').style.height = 'auto';
+
+            // Reset Dynamic Item Mode PIC
+            document.querySelectorAll('.pic-item-card').forEach((k, i) => { if(i > 0) k.remove(); });
+            document.querySelector('.pic-item-card').querySelectorAll('.pic-note-item').forEach((n, i) => { if(i > 0) n.remove(); });
+            document.getElementById('picGlobalProduct').value = '';
+            document.querySelector('.pic-emp-input').value = '';
+            document.querySelector('.pic-notes-input').value = '';
+            document.querySelector('.pic-notes-input').style.height = 'auto';
             
-            if (isModeKehadiran) toggleModeKehadiran();
-            
-            renomorProduk();
+            // Kembalikan ke mode awal
+            setMode('NORMAL');
+            renomorBadge('.item-card', '.product-badge');
+            renomorBadge('.pic-item-card', '.pic-badge');
             perbaruiSapaanNama('');
         }
     </script>
