@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Kinerja Produk</title>
+    <title>Dashboard Perolehan 14812</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library untuk mengambil screenshot HTML menjadi Gambar -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -22,15 +21,15 @@
     <div class="max-w-[90rem] mx-auto space-y-8">
         
         <!-- HEADER UTAMA -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Kinerja Produk</h1>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Perolehan 14812</h1>
                 <p class="text-slate-500 text-sm mt-1">Pilih tanggal untuk melihat pencapaian Harian, Mingguan, dan Bulanan.</p>
             </div>
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                 <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl w-full sm:w-auto shadow-sm">
                     <label for="filterTanggal" class="text-sm font-bold text-slate-600 whitespace-nowrap">Filter Waktu:</label>
-                    <input type="date" id="filterTanggal" onchange="prosesData()" class="bg-transparent text-slate-800 font-bold outline-none cursor-pointer">
+                    <input type="date" id="filterTanggal" onchange="prosesData()" class="bg-transparent text-slate-800 font-bold outline-none cursor-pointer w-full">
                 </div>
                 <div id="statusUpdate" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl text-sm font-bold border border-blue-100 w-full sm:w-auto justify-center transition-colors">
                     <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -40,28 +39,35 @@
         </div>
 
         <!-- CONTAINER KARTU PRODUK -->
-        <div id="product-container" class="space-y-8">
+        <div id="product-container" class="space-y-6 sm:space-y-8">
             <!-- Loading State -->
         </div>
 
         <!-- SECTION: TABEL DETAIL AKUMULASI -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-12 relative" id="akumulasi-card">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-5">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 mt-12 relative" id="akumulasi-card">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 border-b border-slate-100 pb-5">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800 tracking-tight">Akumulasi Detail Pegawai</h2>
                     <p class="text-slate-500 text-sm mt-1">Rekap perolehan semua pegawai per produk berdasarkan rentang tanggal.</p>
+                    <p id="detailRangeLabel" class="mt-2 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">Rentang: -</p>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto" data-html2canvas-ignore="true">
-                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm p-1">
-                        <input type="date" id="startDateDetail" onchange="renderDetailTable()" class="text-sm px-3 py-1.5 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Awal">
-                        <span class="px-2 text-slate-400 text-sm font-bold">s/d</span>
-                        <input type="date" id="endDateDetail" onchange="renderDetailTable()" class="text-sm px-3 py-1.5 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Akhir">
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto" data-html2canvas-ignore="true">
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm p-1 w-full sm:w-auto">
+                        <input type="date" id="startDateDetail" onchange="renderDetailTable()" class="w-full text-xs px-2 py-2 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Awal">
+                        <span class="px-2 text-slate-400 text-xs font-bold">s/d</span>
+                        <input type="date" id="endDateDetail" onchange="renderDetailTable()" class="w-full text-xs px-2 py-2 outline-none bg-transparent text-slate-700 font-bold cursor-pointer" title="Tanggal Akhir">
                     </div>
-                    <button onclick="salinGambarUtuh('akumulasi-card', this)" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span>Copy Gambar Tabel</span>
-                    </button>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="salinTeksWAAkumulasi(this)" class="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 text-white border border-green-600 px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            <span class="hidden sm:inline">Copy Teks WA</span><span class="sm:hidden">Teks WA</span>
+                        </button>
+                        <button onclick="salinGambarUtuh('akumulasi-card', this)" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span class="hidden sm:inline">Copy Gambar</span><span class="sm:hidden">Gambar</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -74,12 +80,14 @@
 
     </div>
 
+    <!-- TOMBOL NAVIGASI MELAYANG (FAB) -->
     <button type="button" id="navFab" onclick="openNavModal()" class="fixed bottom-5 right-5 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_12px_30px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 hover:bg-slate-800" aria-label="Buka menu navigasi">
         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
     </button>
 
+    <!-- MODAL MENU NAVIGASI -->
     <div id="navModal" class="hidden fixed inset-0 z-[75] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeNavModal()"></div>
         <div class="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-white/60 bg-white/90 p-5 shadow-[0_25px_80px_rgba(0,0,0,.3)] backdrop-blur-2xl transform scale-95 transition-transform duration-300">
@@ -93,8 +101,14 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <button type="button" onclick="navigateToPage('index.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Form Input</button>
-                <button type="button" onclick="navigateToPage('admin.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100">Admin</button>
+                <button type="button" onclick="navigateToPage('index.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100 flex items-center justify-between">
+                    Form Input
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <button type="button" onclick="navigateToPage('admin.html')" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left font-semibold text-slate-800 transition hover:bg-slate-100 flex items-center justify-between">
+                    Admin Panel
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
             </div>
         </div>
     </div>
@@ -107,7 +121,40 @@
         let rawDataGlobal = [];
         let targetProdukGlobal = {}; 
         let masterKaryawanGlobal = {}; 
+        
+        let globalDataDashboard = null; 
         let detailTableSortState = { field: 'total', direction: 'desc', value: '' };
+
+        // ==========================================
+        // KUMPULAN KATA-KATA POSITIF OTOMATIS
+        // ==========================================
+        const quotesSukses = [
+            "🔥 Luar biasa! Target berhasil dilampaui. Pertahankan semangat membara ini, tim!",
+            "⭐ Bintang lima untuk tim hari ini! Target tembus, mari rayakan kemenangan ini.",
+            "🚀 Boom! Target pecah! Kerja sama tim yang sangat solid. Proud of you all!",
+            "🏆 Kerja keras yang terbayar lunas! Angka yang fantastis hari ini. Mari kita gaspol lagi besok!",
+            "💎 Pencapaian memukau hari ini! Terima kasih atas dedikasi dan fokus dari seluruh tim.",
+            "🌟 Kalian luar biasa! Angka hari ini membuktikan kapasitas hebat tim kita.",
+            "🎯 Spot on! Target tereksekusi dengan sempurna hari ini. Kerja bagus semuanya!"
+        ];
+        
+        const quotesHampir = [
+            "💪 Sedikit lagi menuju garis finish! Kerja bagus hari ini, besok kita pasti bisa tembus target.",
+            "🔥 Usaha yang luar biasa! Angka sudah sangat bagus, mari kita dorong sedikit lagi besok.",
+            "✨ Hampir sempurna! Tetap semangat dan jangan kendor, besok adalah hari pembuktian kita.",
+            "🏃 Kerja tim yang luar biasa hari ini. Celah target semakin menipis, besok kita hajar habis-habisan!",
+            "📈 Performa yang solid hari ini! Mari evaluasi dan gas lebih kencang besok untuk melampaui target.",
+            "💡 Terus berikan yang terbaik! Sedikit *push* lagi besok dan kita capai angkanya."
+        ];
+        
+        const quotesSemangat = [
+            "🌅 Hari ini mungkin penuh tantangan, tapi besok adalah lembaran baru. Tetap semangat!",
+            "📚 Setiap hasil adalah pembelajaran. Mari kita perkuat strategi dan bangkit lebih kuat besok, tim!",
+            "🤝 Angka hari ini bukan akhir segalanya. Kita evaluasi bersama dan pastikan besok lebih baik!",
+            "⛰️ Tantangan hari ini adalah batu loncatan untuk kesuksesan esok. Tetap fokus dan solid, tim!",
+            "🔋 Jangan patah semangat! Istirahat yang cukup, besok kita kejar ketertinggalan dengan energi baru.",
+            "🛡️ Percaya proses, kerja keras tidak akan mengkhianati hasil. Besok kita berjuang lagi!"
+        ];
 
         window.addEventListener('DOMContentLoaded', () => {
             setTanggalFilterHariIni();
@@ -134,20 +181,43 @@
                 });
         });
 
-        function setTanggalFilterHariIni() {
-            const input = document.getElementById('filterTanggal');
-            const d = new Date();
-            input.value = d.toISOString().split('T')[0];
+        function getLocalYYYYMMDD(d) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
         }
+
+        function setTanggalFilterHariIni() { document.getElementById('filterTanggal').value = getLocalYYYYMMDD(new Date()); }
 
         function setTanggalFilterDetailDefault() {
             const d = new Date();
-            document.getElementById('endDateDetail').value = d.toISOString().split('T')[0];
+            document.getElementById('endDateDetail').value = getLocalYYYYMMDD(d);
             const awalBulan = new Date(d.getFullYear(), d.getMonth(), 1);
-            const yyyy = awalBulan.getFullYear();
-            const mm = String(awalBulan.getMonth() + 1).padStart(2, '0');
-            const dd = String(awalBulan.getDate()).padStart(2, '0');
-            document.getElementById('startDateDetail').value = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('startDateDetail').value = getLocalYYYYMMDD(awalBulan);
+        }
+
+        const bulanSingkat = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        function formatTanggalLabel(date) { return `${String(date.getDate()).padStart(2, '0')} ${bulanSingkat[date.getMonth()]} ${String(date.getFullYear()).slice(-2)}`; }
+        function formatBulanLabel(date) { return `${bulanSingkat[date.getMonth()]} ${String(date.getFullYear()).slice(-2)}`; }
+        function formatMingguLabel(start, end) { return `${String(start.getDate()).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')} ${bulanSingkat[start.getMonth()]}`; }
+        
+        function formatTanggalUntukLabel(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            return `${String(date.getDate()).padStart(2, '0')} ${bulanSingkat[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function updateDetailRangeLabel() {
+            const start = document.getElementById('startDateDetail').value;
+            const end = document.getElementById('endDateDetail').value;
+            const label = document.getElementById('detailRangeLabel');
+            if (!label) return;
+            if (!start || !end) {
+                label.textContent = 'Rentang: -';
+                return;
+            }
+            label.textContent = `Rentang: ${formatTanggalUntukLabel(start)} s/d ${formatTanggalUntukLabel(end)}`;
         }
 
         function openNavModal() {
@@ -172,13 +242,11 @@
 
         function navigateToPage(page) {
             closeNavModal();
-            setTimeout(() => {
-                window.location.href = page;
-            }, 250);
+            setTimeout(() => { window.location.href = page; }, 250);
         }
 
         // ==========================================
-        // FUNGSI COPY/SALIN AJAIB UNTUK MOBILE & DESKTOP
+        // FUNGSI COPY GAMBAR TABEL (LAYOUT ATAS-BAWAH)
         // ==========================================
         async function salinGambarUtuh(elementId, buttonElement) {
             const element = document.getElementById(elementId);
@@ -187,79 +255,68 @@
             const originalHtml = buttonElement.innerHTML;
             const originalClass = buttonElement.className;
 
-            // Efek Loading
-            buttonElement.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Memproses...</span>`;
+            buttonElement.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Memotret...</span>`;
             buttonElement.disabled = true;
 
             try {
-                // 1. Kloning elemen aslinya agar kita bisa otak-atik tampilannya tanpa merusak halaman asli
                 const clone = element.cloneNode(true);
                 
-                // 2. Hapus semua tombol copy yang ada di dalam kloningan agar tidak ikut terfoto
+                // Hapus tombol-tombol yang tidak perlu difoto
                 const ignoreElements = clone.querySelectorAll('[data-html2canvas-ignore="true"]');
                 ignoreElements.forEach(el => el.remove());
 
-                // 3. Buat pembungkus (wrapper) virtual yang ukurannya dipaksa lebar ala Desktop (1280px)
+                // Pembungkus virtual (Dibuat Max-Content agar tabel tidak terpotong)
                 const wrapper = document.createElement('div');
                 wrapper.style.position = 'absolute';
-                wrapper.style.top = '-9999px';  // Sembunyikan di luar layar
+                wrapper.style.top = '-9999px';  
                 wrapper.style.left = '-9999px';
-                wrapper.style.width = '1280px'; // Paksa tampil menjadi versi desktop
-                wrapper.style.padding = '10px';
-                wrapper.style.backgroundColor = '#f8fafc'; // Warna background Body
+                wrapper.style.width = 'max-content'; 
+                wrapper.style.minWidth = '700px'; 
+                wrapper.style.padding = '16px';
+                wrapper.style.backgroundColor = '#f8fafc'; 
                 
-                // 4. Buka kunci semua scroll tabel yang terpotong di HP
+                // Pastikan tabel dirender sempurna (Buka scroll)
                 const scrolls = clone.querySelectorAll('.overflow-x-auto, .table-scroll');
                 scrolls.forEach(sc => {
                     sc.classList.remove('overflow-x-auto', 'table-scroll');
                     sc.style.overflow = 'visible';
+                    sc.style.width = 'max-content';
                 });
 
-                // Masukkan kloningan ke pembungkus virtual
                 wrapper.appendChild(clone);
                 document.body.appendChild(wrapper);
 
-                // 5. Fotokan pembungkus virtual tersebut menggunakan html2canvas
-                const canvas = await html2canvas(clone, {
+                const canvas = await html2canvas(wrapper, {
                     backgroundColor: '#ffffff', 
-                    scale: 2, // Kualitas HD agar tulisan tidak pecah
-                    useCORS: true,
-                    windowWidth: 1280 // Mengelabuhi CSS Tailwind agar menggunakan class khusus Desktop (xl:)
+                    scale: 2, // Resolusi 2x Lipat
+                    useCORS: true
                 });
 
-                // 6. Buang pembungkus virtual dari halaman
                 document.body.removeChild(wrapper);
 
-                // 7. Simpan gambar ke clipboard (papan klip) atau gunakan fallback untuk mobile
+                // Proses Clipboard / Share Mobile
                 canvas.toBlob(async function(blob) {
                     try {
                         if (navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
                             const item = new ClipboardItem({ "image/png": blob });
                             await navigator.clipboard.write([item]);
-                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span>Tersalin!</span>`;
-                            buttonElement.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
+                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span>Gambar Tersalin!</span>`;
+                            buttonElement.className = "bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-md";
                         } else {
                             const url = URL.createObjectURL(blob);
                             const link = document.createElement('a');
                             link.href = url;
-                            link.download = 'capture-dashboard.png';
+                            link.download = 'Laporan-Perolehan.png';
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-                            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'capture-dashboard.png', { type: 'image/png' })] })) {
-                                await navigator.share({
-                                    title: 'Gambar Dashboard',
-                                    files: [new File([blob], 'capture-dashboard.png', { type: 'image/png' })]
-                                });
-                            }
-
-                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> <span>Disimpan / Dibagikan</span>`;
-                            buttonElement.className = "bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto";
+                            buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> <span>Tersimpan</span>`;
+                            buttonElement.className = "bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-md";
                         }
                     } catch (err) {
-                        alert("Gambar berhasil dibuat, tetapi browser Anda belum mendukung fitur salin otomatis pada perangkat ini. Silakan simpan atau bagikan gambar manual.");
+                        alert("Browser Anda belum mendukung copy gambar langsung. Silakan gunakan fitur bagikan.");
                     } finally {
                         setTimeout(() => {
                             buttonElement.innerHTML = originalHtml;
@@ -269,14 +326,150 @@
                     }
                 });
             } catch (error) {
-                alert("Terjadi kesalahan saat memproses gambar tabel.");
+                alert("Terjadi kesalahan saat memproses gambar.");
                 buttonElement.innerHTML = originalHtml;
                 buttonElement.disabled = false;
             }
         }
 
         // ==========================================
-        // LOGIKA RENDER TABEL DETAIL AKUMULASI
+        // FUNGSI COPY TEKS FORMAT WA DENGAN KUTIPAN
+        // ==========================================
+        function salinTeksWAProduk(namaProduk, btnElement) {
+            if(!globalDataDashboard) return;
+
+            const data = globalDataDashboard.dataGroup[namaProduk];
+            const target = targetProdukGlobal[namaProduk] || { daily: 0, weekly: 0, monthly: 0 };
+            const labelHariIni = formatTanggalUntukLabel(globalDataDashboard.baseDate);
+            
+            const pctDaily = target.daily > 0 ? Math.round((data.perolehanHarian / target.daily) * 100) : 0;
+            const pctWeekly = target.weekly > 0 ? Math.round((data.perolehanMingguan / target.weekly) * 100) : 0;
+            const pctMonthly = target.monthly > 0 ? Math.round((data.perolehanBulanan / target.monthly) * 100) : 0;
+
+            const gapDaily = data.perolehanHarian - target.daily;
+            const gapWeekly = data.perolehanMingguan - target.weekly;
+            const gapMonthly = data.perolehanBulanan - target.monthly;
+
+            const arrIndividu = Object.keys(data.individuBulanan).map(nama => {
+                return { nama: nama, harian: data.individuHarian[nama], bulanan: data.individuBulanan[nama] };
+            }).sort((a, b) => b.bulanan - a.bulanan);
+
+            let textWA = `*📊 LAPORAN PEROLEHAN 14812*\n`;
+            textWA += `🗓️ *Tanggal:* ${labelHariIni}\n`;
+            textWA += `🏷️ *Produk:* ${namaProduk}\n\n`;
+
+            textWA += `*🎯 PENCAPAIAN TARGET*\n`;
+            textWA += `• *Harian:* ${data.perolehanHarian} / ${target.daily} (${pctDaily}%) | Gap: ${gapDaily >= 0 ? '+'+gapDaily : gapDaily}\n`;
+            textWA += `• *Mingguan:* ${data.perolehanMingguan} / ${target.weekly} (${pctWeekly}%) | Gap: ${gapWeekly >= 0 ? '+'+gapWeekly : gapWeekly}\n`;
+            textWA += `• *Bulanan:* ${data.perolehanBulanan} / ${target.monthly} (${pctMonthly}%) | Gap: ${gapMonthly >= 0 ? '+'+gapMonthly : gapMonthly}\n\n`;
+
+            textWA += `*👥 RINCIAN TIM (Harian | Bulanan)*\n`;
+            if(arrIndividu.length === 0) {
+                textWA += `- Belum ada tim yang ditugaskan.\n`;
+            } else {
+                arrIndividu.forEach((indv, idx) => {
+                    let isAbsen = globalDataDashboard.statusAbsenHarian[indv.nama];
+                    if (isAbsen) {
+                        textWA += `${idx+1}. ${indv.nama}: [Absen: ${isAbsen}]\n`;
+                    } else if (indv.bulanan === 0) {
+                        textWA += `${idx+1}. ${indv.nama}: Nihil\n`;
+                    } else {
+                        textWA += `${idx+1}. ${indv.nama}: ${indv.harian} | ${indv.bulanan}\n`;
+                    }
+                });
+            }
+
+            // --- TAMBAHAN KATA-KATA POSITIF ---
+            let selectedQuote = "";
+            if (pctDaily >= 100) {
+                selectedQuote = quotesSukses[Math.floor(Math.random() * quotesSukses.length)];
+            } else if (pctDaily >= 80) {
+                selectedQuote = quotesHampir[Math.floor(Math.random() * quotesHampir.length)];
+            } else {
+                selectedQuote = quotesSemangat[Math.floor(Math.random() * quotesSemangat.length)];
+            }
+            
+            textWA += `\n💬 _"${selectedQuote}"_\n`;
+
+            eksekusiCopyTeks(textWA, btnElement);
+        }
+
+        function salinTeksWAAkumulasi(btnElement) {
+            const start = document.getElementById('startDateDetail').value;
+            const end = document.getElementById('endDateDetail').value;
+            if (!start || !end || !globalDataDashboard) return;
+
+            let textWA = `*📊 AKUMULASI DETAIL PEGAWAI*\n`;
+            textWA += `🗓️ *Rentang:* ${formatTanggalUntukLabel(start)} s/d ${formatTanggalUntukLabel(end)}\n\n`;
+
+            const startD = new Date(start); startD.setHours(0,0,0,0);
+            const endD = new Date(end); endD.setHours(23,59,59,999);
+            
+            const allProducts = Object.keys(targetProdukGlobal); 
+            const allEmployees = Object.keys(masterKaryawanGlobal);
+            let akumulasi = {};
+            
+            allEmployees.forEach(emp => {
+                akumulasi[emp] = {};
+                allProducts.forEach(prod => { akumulasi[emp][prod] = 0; });
+                akumulasi[emp]['TOTAL'] = 0;
+            });
+            
+            rawDataGlobal.forEach(row => {
+                if(!row.tanggal) return;
+                const tglData = new Date(row.tanggal);
+                tglData.setHours(0,0,0,0);
+                if (tglData.getTime() >= startD.getTime() && tglData.getTime() <= endD.getTime()) {
+                    const prodName = row.product ? row.product.toUpperCase() : "";
+                    const empName = row.nama || "";
+                    if (allProducts.includes(prodName) && akumulasi[empName]) {
+                        akumulasi[empName][prodName]++;
+                        akumulasi[empName]['TOTAL']++;
+                    }
+                }
+            });
+
+            const sortedEmployees = [...allEmployees].sort((a, b) => akumulasi[b]['TOTAL'] - akumulasi[a]['TOTAL']);
+
+            sortedEmployees.forEach((emp, idx) => {
+                if(akumulasi[emp]['TOTAL'] > 0) {
+                    textWA += `*${idx+1}. ${emp}* (Total: ${akumulasi[emp]['TOTAL']})\n`;
+                    allProducts.forEach(prod => {
+                        if(akumulasi[emp][prod] > 0) {
+                            textWA += `   • ${prod}: ${akumulasi[emp][prod]}\n`;
+                        }
+                    });
+                } else {
+                    textWA += `*${idx+1}. ${emp}*: Nihil\n`;
+                }
+            });
+            
+            textWA += `\n💬 _"Mari terus berikan yang terbaik dan jadikan pencapaian kita sebagai standar keunggulan!"_\n`;
+
+            eksekusiCopyTeks(textWA, btnElement);
+        }
+
+        function eksekusiCopyTeks(text, buttonElement) {
+            const originalHtml = buttonElement.innerHTML;
+            const originalClass = buttonElement.className;
+
+            buttonElement.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Menyalin...</span>`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                buttonElement.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> <span class="hidden sm:inline">Teks WA Tersalin!</span><span class="sm:hidden">Selesai</span>`;
+                buttonElement.className = "bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5";
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalHtml;
+                    buttonElement.className = originalClass;
+                }, 2000);
+            }).catch(err => {
+                alert('Gagal menyalin teks.');
+                buttonElement.innerHTML = originalHtml;
+            });
+        }
+
+        // ==========================================
+        // LOGIKA RENDER TABEL DETAIL AKUMULASI (UI)
         // ==========================================
         function renderDetailTable() {
             if (rawDataGlobal.length === 0 || Object.keys(targetProdukGlobal).length === 0) return;
@@ -286,6 +479,7 @@
             
             if (!startDateVal || !endDateVal) return;
             
+            updateDetailRangeLabel();
             const start = new Date(startDateVal); start.setHours(0,0,0,0);
             const end = new Date(endDateVal); end.setHours(23,59,59,999);
             const isSingleDateRange = startDateVal === endDateVal;
@@ -344,7 +538,7 @@
             let thead = `
                 <thead class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider font-bold">
                     <tr>
-                        <th class="p-3 border-b border-r border-slate-200">
+                        <th class="px-3 py-2 border-b border-r border-slate-200">
                             <button type="button" class="flex w-full items-center justify-between gap-2 text-left" onclick="setDetailTableSort('name')">
                                 <span>Nama Pegawai</span>
                                 <span class="text-[10px]">${detailTableSortState.field === 'name' ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
@@ -352,14 +546,14 @@
                         </th>`;
             allProducts.forEach(prod => {
                 const safeProd = prod.replace(/'/g, "\\'");
-                thead += `<th class="p-3 border-b border-r border-slate-200 text-center">
+                thead += `<th class="px-3 py-2 border-b border-r border-slate-200 text-center">
                     <button type="button" class="flex w-full items-center justify-center gap-2 font-bold" onclick="setDetailTableSort('product', '${safeProd}')">
                         <span>${prod}</span>
                         <span class="text-[10px]">${detailTableSortState.field === 'product' && detailTableSortState.value === prod ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
                     </button>
                 </th>`;
             });
-            thead += `<th class="p-3 border-b border-slate-200 text-center bg-slate-200 text-slate-800">
+            thead += `<th class="px-3 py-2 border-b border-slate-200 text-center bg-slate-200 text-slate-800">
                 <button type="button" class="flex w-full items-center justify-center gap-2 font-bold" onclick="setDetailTableSort('total')">
                     <span>TOTAL</span>
                     <span class="text-[10px]">${detailTableSortState.field === 'total' ? (detailTableSortState.direction === 'asc' ? '▲' : '▼') : '↕'}</span>
@@ -373,13 +567,13 @@
             const grandTotal = sortedEmployees.reduce((sum, emp) => sum + akumulasi[emp]['TOTAL'], 0);
 
             let tbody = `<tbody class="text-sm text-slate-700 divide-y divide-slate-100">
-                <tr class="bg-slate-800 text-white font-bold">
-                    <td class="p-3 border-r border-slate-700">TOTAL PER PRODUK</td>`;
+                <tr class="bg-slate-800 text-white font-bold text-xs uppercase tracking-wider">
+                    <td class="px-3 py-2 border-r border-slate-700">TOTAL PER PRODUK</td>`;
             allProducts.forEach(prod => {
                 const totalValue = totalPerProduk[prod];
-                tbody += `<td class="p-3 border-r border-slate-700 text-center">${totalValue}</td>`;
+                tbody += `<td class="px-3 py-2 border-r border-slate-700 text-center">${totalValue}</td>`;
             });
-            tbody += `<td class="p-3 text-center bg-slate-900">${grandTotal}</td></tr>`;
+            tbody += `<td class="px-3 py-2 text-center bg-slate-900">${grandTotal}</td></tr>`;
 
             sortedEmployees.forEach(emp => {
                 let totalVal = akumulasi[emp]['TOTAL'];
@@ -389,9 +583,9 @@
                 const absenDetail = isSingleDateRange && absensiInfo[emp] ? formatAbsensiNote(absensiInfo[emp]) : '';
                 tbody += `
                     <tr>
-                        <td class="p-3 border-r border-slate-100 ${textClass}">
+                        <td class="px-3 py-2 border-r border-slate-100 ${textClass}">
                             <div>${emp}</div>
-                            ${absenDetail ? `<div class="mt-1 text-[11px] font-semibold text-rose-600">${absenDetail}</div>` : ''}
+                            ${absenDetail ? `<div class="mt-0.5 text-[11px] font-semibold text-rose-600">${absenDetail}</div>` : ''}
                         </td>`;
                 
                 allProducts.forEach(prod => {
@@ -400,16 +594,16 @@
                     const isAssigned = assignedProducts.length === 0 || assignedProducts.includes(String(prod).trim().toUpperCase());
                     const val = akumulasi[emp][prod];
                     const cellClass = isAssigned
-                        ? "p-3 border-r border-slate-100 text-center"
-                        : "p-3 border-r border-rose-200 bg-rose-50 text-rose-700 text-center";
+                        ? "px-3 py-2 border-r border-slate-100 text-center"
+                        : "px-3 py-2 border-r border-rose-100 bg-rose-50/50 text-rose-400 text-center text-xs";
                     const valHtml = !isAssigned
-                        ? `<span class="font-bold">✕</span>`
+                        ? `<span>✕</span>`
                         : (val === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${val}</span>`);
                     tbody += `<td class="${cellClass}">${valHtml}</td>`;
                 });
                 
                 let totalHtml = isNihil ? `<span class="text-slate-300">-</span>` : `<span class="font-black text-slate-800">${totalVal}</span>`;
-                tbody += `<td class="p-3 text-center bg-slate-50">${totalHtml}</td></tr>`;
+                tbody += `<td class="px-3 py-2 text-center bg-slate-50">${totalHtml}</td></tr>`;
             });
 
             tbody += `</tbody>`;
@@ -418,18 +612,13 @@
         }
 
         function getDetailSortValue(emp, field, productName, akumulasi, masterKaryawanGlobal) {
-            if (field === 'name') {
-                return emp.toLowerCase();
-            }
-
+            if (field === 'name') return emp.toLowerCase();
             if (field === 'product' && productName) {
-                const assignedProducts = (masterKaryawanGlobal[emp]?.produkAssign || [])
-                    .map(item => String(item).trim().toUpperCase());
+                const assignedProducts = (masterKaryawanGlobal[emp]?.produkAssign || []).map(item => String(item).trim().toUpperCase());
                 const isAssigned = assignedProducts.length === 0 || assignedProducts.includes(String(productName).trim().toUpperCase());
                 if (!isAssigned) return -1;
                 return akumulasi[emp][productName];
             }
-
             return akumulasi[emp]['TOTAL'];
         }
 
@@ -446,7 +635,7 @@
 
         function formatAbsensiNote(info) {
             const label = String(info.label || 'ABSEN').replace(/_/g, ' ');
-            return info.note ? `Absen: ${label} • ${info.note}` : `Absen: ${label}`;
+            return info.note && info.note !== "-" ? `Absen: ${label} • ${info.note}` : `Absen: ${label}`;
         }
 
         // ==========================================
@@ -539,6 +728,8 @@
                 }
             });
 
+            // Simpan ke variabel global untuk akses copy teks WA
+            globalDataDashboard = { dataGroup: dataPerProduk, baseDate, startOfWeek, endOfWeek, statusAbsenHarian };
             renderDashboard(dataPerProduk, baseDate, startOfWeek, endOfWeek, statusAbsenHarian);
         }
 
@@ -580,7 +771,7 @@
                     
                     let labelHarian = '';
                     if (isAbsen) {
-                        labelHarian = `<span class="bg-rose-100 text-rose-600 border border-rose-200 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">${isAbsen}</span>`;
+                        labelHarian = `<span class="bg-rose-100 text-rose-600 border border-rose-200 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide shadow-sm">${isAbsen}</span>`;
                     } else {
                         labelHarian = indv.harian === 0 ? `<span class="text-slate-300">-</span>` : `<span class="font-bold text-blue-600">${indv.harian}</span>`;
                     }
@@ -589,9 +780,9 @@
                         
                     htmlIndividu += `
                     <tr class="border-b border-slate-100 last:border-0 text-sm">
-                        <td class="px-4 py-2.5 ${classRow}">${indv.nama}</td>
-                        <td class="px-4 py-2.5 text-center">${labelHarian}</td>
-                        <td class="px-4 py-2.5 text-center bg-slate-50">${labelBulanan}</td>
+                        <td class="px-3 py-2 ${classRow}">${indv.nama}</td>
+                        <td class="px-3 py-2 text-center">${labelHarian}</td>
+                        <td class="px-3 py-2 text-center bg-slate-50">${labelBulanan}</td>
                     </tr>`;
                 });
 
@@ -599,85 +790,91 @@
                     htmlIndividu = `<tr><td colspan="3" class="px-4 py-3 text-center text-slate-400 italic">Tidak ada tim yang ditugaskan.</td></tr>`;
                 }
 
-                const gapFormatter = (gapValue) => gapValue < 0 ? `<span class="text-red-600 font-bold">${gapValue}</span>` : `<span class="text-emerald-600 font-bold">${gapValue}</span>`;
+                const gapFormatter = (gapValue) => gapValue < 0 ? `<span class="text-red-600 font-bold">${gapValue}</span>` : `<span class="text-emerald-600 font-bold">+${gapValue}</span>`;
+                const safeNamaProduk = namaProduk.replace(/'/g, "\\'");
 
                 const htmlCard = `
-                <div id="${cardId}" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col xl:flex-row relative">
+                <!-- PERUBAHAN LAYOUT: FLEX-COL UNTUK HEADER DI ATAS -->
+                <div id="${cardId}" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
                     
-                    <!-- TOMBOL COPY GLOBAL KARTU (Sembunyi otomatis saat dipotret html2canvas) -->
-                    <div class="absolute top-2 left-2 sm:top-4 sm:left-4 z-20" data-html2canvas-ignore="true">
-                        <button onclick="salinGambarUtuh('${cardId}', this)" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg> 
-                            <span class="hidden sm:inline">Copy Keseluruhan ${namaProduk}</span>
-                            <span class="sm:hidden">Copy</span>
-                        </button>
-                    </div>
-
-                    <!-- SIDE BANNER -->
-                    <div class="xl:w-64 bg-gradient-to-br from-blue-800 to-blue-900 text-white p-8 sm:p-6 flex flex-col justify-center items-center shrink-0 border-b xl:border-b-0 xl:border-r border-blue-900 pt-16 xl:pt-6">
-                        <h3 class="text-3xl font-black tracking-wider text-center">${namaProduk}</h3>
-                        <span class="text-xs font-medium text-blue-200 mt-2 bg-blue-950 px-3 py-1 rounded-full">${labelHariIni}</span>
+                    <!-- BANNER HEADER UTAMA -->
+                    <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white p-4 sm:p-5 flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-xl sm:text-2xl font-black tracking-wider drop-shadow-md uppercase">${namaProduk}</h3>
+                            <span class="text-[10px] font-bold text-blue-200 bg-blue-950 px-3 py-1 rounded-full border border-blue-800/50 shadow-inner">${labelHariIni}</span>
+                        </div>
+                        
+                        <!-- TOMBOL ACTION (Di Sebelah Kanan Nama Produk) -->
+                        <div class="flex gap-2" data-html2canvas-ignore="true">
+                            <button onclick="salinTeksWAProduk('${safeNamaProduk}', this)" class="bg-green-500 hover:bg-green-400 text-white border border-green-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg> 
+                                <span class="hidden sm:inline">Copy Teks WA</span><span class="sm:hidden">Teks</span>
+                            </button>
+                            <button onclick="salinGambarUtuh('${cardId}', this)" class="bg-blue-500 hover:bg-blue-400 text-white border border-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 
+                                <span class="hidden sm:inline">Copy Gambar</span><span class="sm:hidden">Gambar</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex-1 overflow-hidden flex flex-col bg-white">
                         
                         <!-- TABEL TARGET -->
-                        <div class="table-scroll overflow-x-auto w-full border-b border-slate-200 p-2 sm:p-0">
+                        <div class="table-scroll overflow-x-auto w-full border-b border-slate-200">
                             <table class="w-full text-center border-collapse whitespace-nowrap bg-white">
                                 <thead>
                                     <tr>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r-4 border-blue-700 text-xs font-bold tracking-widest uppercase">Daily</th>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-r-4 border-blue-700 text-xs font-bold tracking-widest uppercase">Weekly</th>
-                                        <th colspan="4" class="bg-blue-600 text-white p-2.5 border-b border-blue-700 text-xs font-bold tracking-widest uppercase">Monthly</th>
+                                        <th colspan="4" class="bg-blue-600 text-white px-2 py-1.5 border-b border-r-4 border-blue-700 text-[11px] font-bold tracking-widest uppercase">Daily</th>
+                                        <th colspan="4" class="bg-blue-600 text-white px-2 py-1.5 border-b border-r-4 border-blue-700 text-[11px] font-bold tracking-widest uppercase">Weekly</th>
+                                        <th colspan="4" class="bg-blue-600 text-white px-2 py-1.5 border-b border-blue-700 text-[11px] font-bold tracking-widest uppercase">Monthly</th>
                                     </tr>
                                     <tr class="bg-blue-50 text-blue-800 text-[10px] tracking-wider uppercase font-bold">
-                                        <th class="p-2 border-b border-r border-blue-100">${labelHariIni}</th>
-                                        <th class="p-2 border-b border-r border-blue-100">Target</th>
-                                        <th class="p-2 border-b border-r border-blue-100">%</th>
-                                        <th class="p-2 border-b border-r-4 border-blue-100">GAP</th>
-                                        <th class="p-2 border-b border-r border-blue-100">${labelMingguIni}</th>
-                                        <th class="p-2 border-b border-r border-blue-100">Target</th>
-                                        <th class="p-2 border-b border-r border-blue-100">%</th>
-                                        <th class="p-2 border-b border-r-4 border-blue-100">GAP</th>
-                                        <th class="p-2 border-b border-r border-blue-100">${labelBulanIni}</th>
-                                        <th class="p-2 border-b border-r border-blue-100">Target</th>
-                                        <th class="p-2 border-b border-r border-blue-100">%</th>
-                                        <th class="p-2 border-b border-blue-100">GAP</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">${labelHariIni}</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">Target</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">%</th>
+                                        <th class="px-2 py-1.5 border-b border-r-4 border-blue-100 text-xs">GAP</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">${labelMingguIni}</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">Target</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">%</th>
+                                        <th class="px-2 py-1.5 border-b border-r-4 border-blue-100 text-xs">GAP</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">${labelBulanIni}</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">Target</th>
+                                        <th class="px-2 py-1.5 border-b border-r border-blue-100">%</th>
+                                        <th class="px-2 py-1.5 border-b border-blue-100 text-xs">GAP</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-slate-800 text-sm">
                                     <tr class="bg-white">
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanHarian > 0 ? data.perolehanHarian : ''}</td>
-                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.daily}</td>
-                                        <td class="p-3 border-r border-slate-200 font-bold">${pctDaily}%</td>
-                                        <td class="p-3 border-r-4 border-slate-200">${gapFormatter(gapDaily)}</td>
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanMingguan > 0 ? data.perolehanMingguan : '-'}</td>
-                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.weekly}</td>
-                                        <td class="p-3 border-r border-slate-200 font-bold">${pctWeekly}%</td>
-                                        <td class="p-3 border-r-4 border-slate-200">${gapFormatter(gapWeekly)}</td>
-                                        <td class="bg-blue-50 text-blue-700 font-black p-3 border-r border-slate-200 text-base">${data.perolehanBulanan > 0 ? data.perolehanBulanan : '-'}</td>
-                                        <td class="p-3 border-r border-slate-200 font-semibold text-slate-500">${target.monthly}</td>
-                                        <td class="p-3 border-r border-slate-200 font-bold">${pctMonthly}%</td>
-                                        <td class="p-3">${gapFormatter(gapMonthly)}</td>
+                                        <td class="bg-blue-50/50 text-blue-700 font-black px-2 py-2 border-r border-slate-200 text-sm">${data.perolehanHarian > 0 ? data.perolehanHarian : ''}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-semibold text-slate-500">${target.daily}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-bold">${pctDaily}%</td>
+                                        <td class="px-2 py-2 border-r-4 border-slate-200 bg-slate-50/50">${gapFormatter(gapDaily)}</td>
+                                        <td class="bg-blue-50/50 text-blue-700 font-black px-2 py-2 border-r border-slate-200 text-sm">${data.perolehanMingguan > 0 ? data.perolehanMingguan : '-'}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-semibold text-slate-500">${target.weekly}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-bold">${pctWeekly}%</td>
+                                        <td class="px-2 py-2 border-r-4 border-slate-200 bg-slate-50/50">${gapFormatter(gapWeekly)}</td>
+                                        <td class="bg-blue-50/50 text-blue-700 font-black px-2 py-2 border-r border-slate-200 text-sm">${data.perolehanBulanan > 0 ? data.perolehanBulanan : '-'}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-semibold text-slate-500">${target.monthly}</td>
+                                        <td class="px-2 py-2 border-r border-slate-200 font-bold">${pctMonthly}%</td>
+                                        <td class="px-2 py-2 bg-slate-50/50">${gapFormatter(gapMonthly)}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         
                         <!-- TABEL TIM -->
-                        <div class="p-4 sm:p-5 bg-slate-50 flex-1">
-                            <h4 class="font-bold text-xs text-slate-600 uppercase tracking-wide mb-3">Tim Penanggung Jawab</h4>
-                            
-                            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                        <div class="p-3 sm:p-5 bg-slate-50/30 flex-1">
+                            <h4 class="font-bold text-[11px] text-slate-500 uppercase tracking-wider mb-2">Tim Penanggung Jawab</h4>
+                            <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
                                 <table class="w-full max-w-2xl text-left bg-white">
                                     <thead class="bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
                                         <tr>
-                                            <th class="px-4 py-2 border-b border-slate-200">Nama</th>
-                                            <th class="px-4 py-2 border-b border-slate-200 text-center border-l border-slate-200">Total Harian</th>
-                                            <th class="px-4 py-2 border-b border-slate-200 text-center border-l border-slate-200">Total Bulanan</th>
+                                            <th class="px-3 py-2 border-b border-slate-200">Nama</th>
+                                            <th class="px-3 py-2 border-b border-slate-200 text-center border-l border-slate-200 w-28">Total Harian</th>
+                                            <th class="px-3 py-2 border-b border-slate-200 text-center border-l border-slate-200 w-28 bg-slate-200/50">Total Bulanan</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="divide-y divide-slate-100">
                                         ${htmlIndividu}
                                     </tbody>
                                 </table>
@@ -690,11 +887,6 @@
                 container.insertAdjacentHTML('beforeend', htmlCard);
             });
         }
-
-        const bulanSingkat = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-        function formatTanggalLabel(date) { return `${String(date.getDate()).padStart(2, '0')}-${bulanSingkat[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`; }
-        function formatBulanLabel(date) { return `${bulanSingkat[date.getMonth()]}-${String(date.getFullYear()).slice(-2)}`; }
-        function formatMingguLabel(start, end) { return `${String(start.getDate()).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')} ${bulanSingkat[start.getMonth()]}`; }
     </script>
 </body>
 </html>
